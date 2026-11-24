@@ -1,0 +1,20 @@
+#  The contact options (sidebar footer icons).
+#  GitHub only shows once `github.username` is set in _config.yml.
+
+- type: github
+  icon: "fab fa-github"
+  url: 'https://github.com/YOUR-USERNAME'
+
+- type: linkedin
+  icon: "fab fa-linkedin"
+  url: "https://www.linkedin.com/in/YOUR-PROFILE"
+  
+- type: email
+  icon: "fas fa-envelope"
+  noblank: true # open link in current tab
+
+# Uncomment and fill in to add LinkedIn:
+#
+# - type: linkedin
+#   icon: "fab fa-linkedin"
+#   url: "https://www.linkedin.com/in/your-handle"

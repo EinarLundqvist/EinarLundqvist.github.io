@@ -1,0 +1,1 @@
+<li{% if include.tip %} class="has-tip" tabindex="0" data-color="{{ include.color }}" data-tip="{{ include.tip }}"{% endif %}><span class="pf-ico" style="background-image:url('{{ '/assets/img/icons/' | append: include.icon | relative_url }}')" aria-hidden="true"></span>{{ include.name }}</li>

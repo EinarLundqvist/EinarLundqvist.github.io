@@ -1,0 +1,87 @@
+---
+layout: default
+---
+
+{% include lang.html %}
+
+<h1 class="hero"><em></em></h1>
+
+{%- comment -%} Collect this page's posts (pinned first, then normal) {%- endcomment -%}
+{% assign all_pinned = site.posts | where: 'pin', 'true' %}
+{% assign all_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
+{% assign posts = '' | split: '' %}
+{% assign visible_start = paginator.page | minus: 1 | times: paginator.per_page %}
+{% assign visible_end = visible_start | plus: paginator.per_page %}
+
+{% if all_pinned.size > visible_start %}
+  {% if all_pinned.size > visible_end %}
+    {% assign pinned_size = paginator.per_page %}
+  {% else %}
+    {% assign pinned_size = all_pinned.size | minus: visible_start %}
+  {% endif %}
+  {% for i in (visible_start..all_pinned.size) limit: pinned_size %}
+    {% assign posts = posts | push: all_pinned[i] %}
+  {% endfor %}
+{% else %}
+  {% assign pinned_size = 0 %}
+{% endif %}
+
+{% assign normal_size = paginator.posts | size | minus: pinned_size %}
+{% if normal_size > 0 %}
+  {% if pinned_size > 0 %}
+    {% assign normal_start = 0 %}
+  {% else %}
+    {% assign normal_start = visible_start | minus: all_pinned.size %}
+  {% endif %}
+  {% assign normal_end = normal_start | plus: normal_size | minus: 1 %}
+  {% for i in (normal_start..normal_end) %}
+    {% assign posts = posts | push: all_normal[i] %}
+  {% endfor %}
+{% endif %}
+
+<div class="pf-works pf-ledger">
+  {% for post in posts %}
+    {%- comment -%} Preview image {%- endcomment -%}
+    {%- assign pf_src = '' -%}
+    {%- assign pf_alt = '' -%}
+    {%- if post.image -%}
+      {%- assign pf_src = post.image.path | default: post.image -%}
+      {%- if post.media_subpath -%}
+        {%- unless pf_src contains '://' -%}
+          {%- assign pf_src = post.media_subpath | append: '/' | append: pf_src | replace: '///', '/' | replace: '//', '/' -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- assign pf_alt = post.image.alt | default: post.title | xml_escape -%}
+    {%- endif -%}
+    <article class="pf-work">
+      <a href="{{ post.url | relative_url }}" class="pf-link">
+        <div class="pf-shot">
+          {% if pf_src != '' %}<img src="{{ pf_src }}" alt="{{ pf_alt }}" loading="lazy">{% endif %}
+          <div class="pf-ascii" aria-hidden="true"></div>
+        </div>
+
+        <div class="pf-info">
+        <h2 class="pf-title">{{ post.title }}</h2>
+      
+        <div class="pf-body">
+          {%- assign pf_desc = post.description | default: post.excerpt | strip_html | strip_newlines | truncate: 140 -%}
+          {%- if pf_desc != '' -%}<p class="pf-desc">{{ pf_desc }}</p>{%- endif -%}
+      
+          <dl class="pf-spec">
+            <dt>year</dt><dd>{{ post.date | date: '%Y' }}</dd>
+            {% if post.categories.size > 0 %}<dt>type</dt><dd>{{ post.categories | join: ', ' }}</dd>{% endif %}
+          </dl>
+        </div>
+      </div>
+      </a>
+    </article>
+  {% endfor %}
+</div>
+
+{% if paginator.total_pages > 1 %}
+  {% include post-paginator.html %}
+{% endif %}
+
+<p class="pf-home-cta">
+  <a class="pf-btn" href="{{ '/about/' | relative_url }}">About Me <i class="fas fa-arrow-right"></i></a>
+</p>

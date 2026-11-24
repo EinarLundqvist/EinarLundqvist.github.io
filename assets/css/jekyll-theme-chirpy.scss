@@ -1,0 +1,1190 @@
+---
+---
+
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+/* ==========================================================================
+   Portfolio customisation (everything below is yours)
+   ========================================================================== */
+
+:root {
+  --pf-neon: #e4a149;
+  --pf-paper: #a7a7a7;
+  --pf-ink: #919191;
+  --pf-panel: #242424;
+  --pf-ring: #444444;
+  --pf-display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --pf-serif: 'Instrument Serif', Georgia, serif;
+  --pf-mono: ui-monospace, 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  --pf-ease: cubic-bezier(.22, 1, .36, 1);
+  --pf-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.67 .67 .67 0 -.5 .67 .67 .67 0 -.5 .67 .67 .67 0 -.5 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --pf-noise-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.67 .67 .67 0 -.5 .67 .67 .67 0 -.5 .67 .67 .67 0 -.5 0 0 0 0 .06'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+:root[data-bs-theme=dark] {
+  --main-bg: #0f0f0f00;
+  --mask-bg: #0f0f0f00;
+  --main-border-color: #282828;
+  --text-color: #a3a3a3;
+  --text-muted-color: #838383;
+  --text-muted-highlight-color: #c5c5c5;
+  --heading-color: var(--pf-paper);
+  --label-color: #b1b1b1;
+  --link-color: var(--pf-neon);
+  --link-underline-color: #e4a14973;
+  --blockquote-border-color: var(--pf-ring);
+  --blockquote-text-color: #919191;
+  --button-bg: #1a1a1a;
+  --btn-border-color: var(--pf-ring);
+  --card-header-bg: #2c2c2c;
+  --card-bg: var(--pf-panel);
+  --card-hover-bg: #303030;
+  --card-shadow: rgb(0 0 0 / 45%) 0 6px 18px 0, var(--pf-ring) 0 0 0 2px;
+  --menu-bg: var(--pf-panel);
+  --menu-border-color: var(--pf-ring);
+  --menu-highlight-bg: rgba(190, 190, 190, 0.08);
+  --site-title-color: var(--pf-paper);
+  --site-subtitle-color: #969696;
+  --sidebar-bg: #131313;
+  --sidebar-border-color: var(--pf-ring);
+  --sidebar-muted-color: #979797;
+  --sidebar-active-color: var(--pf-neon);
+  --sidebar-hover-bg: rgb(240 152 37 / 8%);
+  --sidebar-btn-bg: #1e1e1e;
+  --sidebar-btn-color: #979797;
+  --avatar-border-color: var(--pf-neon);
+  --topbar-bg: rgb(15 15 15 / 72%);
+  --search-border-color: var(--pf-ring);
+  --input-focus-border-color: var(--pf-neon);
+  --post-list-text-color: #a7a7a7;
+  --btn-paginator-hover-color: #282828;
+  --toc-highlight: var(--pf-neon);
+  --toc-popup-border-color: var(--pf-ring);
+  --tag-hover: rgb(240 152 37 / 14%);
+  --tag-border: var(--pf-ring);
+  --tag-shadow: #1a1a1a;
+  --tb-odd-bg: #1e1e1e;
+  --tb-even-bg: #161616;
+  --dash-color: var(--pf-ring);
+  --timeline-node-bg: var(--pf-neon);
+  --timeline-color: var(--pf-ring);
+  --highlight-bg-color: #101010;
+  --language-border-color: #242424;
+  --inline-code-bg: rgba(201, 201, 201, 0.08);
+  --code-color: #cecece;
+}
+
+::selection {
+  background: var(--pf-neon);
+  color: #0f0f0f;
+}
+
+html {
+  background: var(--main-bg);
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  background: rgba(0, 0, 0, 0);
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .1;
+  mix-blend-mode: overlay;
+  background: var(--pf-noise) 0 0 / 260px 260px;
+}
+
+#main-wrapper {
+  background: rgba(0, 0, 0, 0);
+}
+
+html::-webkit-scrollbar {
+  width: 14px;
+}
+
+html::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, transparent 4px, var(--pf-neon) 4px, var(--pf-neon) 10px, transparent 10px);
+  border-radius: 999px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--pf-neon) rgba(0, 0, 0, 0);
+  }
+}
+
+/* ---------- sidebar ---------- */
+#sidebar {
+  border-right: 0;
+  background-image: var(--pf-noise-soft);
+  background-size: 260px 260px;
+}
+
+#sidebar #avatar {
+  border: 2px solid var(--pf-neon);
+  box-shadow: 0 0 .8rem rgba(240, 152, 37, .35);
+}
+
+#sidebar .site-title {
+  margin-top: 1.25rem;
+}
+
+#sidebar .site-title .site-title-first,
+#sidebar .site-title .site-title-rest {
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: none;
+  color: inherit;
+}
+
+#sidebar .site-title .site-title-first {
+  margin-right: .3em;
+}
+
+#sidebar .nav-link > span {
+  position: relative;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+#sidebar ul > li.nav-item .nav-link > span span {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+
+#sidebar .nav-link > span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.35rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--pf-neon);
+  box-shadow: 0 0 .6rem var(--pf-neon);
+  transform-origin: right center;
+  transform: scaleX(0);
+  transition: transform .4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#sidebar .nav-item.active .nav-link > span::after,
+#sidebar .nav-link:hover > span::after,
+#sidebar .nav-link:focus-visible > span::after {
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
+// keep Home's underline while viewing a project
+#sidebar .nav-item.is-parent > .nav-link > span::after {
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
+#sidebar ul > li.nav-item .nav-link {
+  border-radius: .2rem !important;
+}
+/* ---------- CV preview in sidebar ---------- */
+#sidebar .cv-item {
+  --cv-w: 9rem;      /* picture width (was 5.5rem) */
+  --cv-hide: 2.75rem;  /* part tucked behind the button (was 3.5rem) */
+  --cv-tilt: 5deg;
+}
+
+#sidebar .cv-item .cv-peek {
+  display: grid;
+  grid-template-rows: 0fr;               /* closed: takes no space */
+  cursor: pointer;
+  outline: none;
+  transition: grid-template-rows .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* open while the mouse is on the link OR the picture */
+#sidebar .cv-item:hover .cv-peek,
+#sidebar .cv-item:has(.nav-link:focus-visible) .cv-peek {
+  grid-template-rows: 1fr;
+}
+
+/* the clip: its top edge acts like the bottom edge of the CV button */
+#sidebar .cv-item .cv-peek-clip {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
+  padding-inline: 1rem;                  /* room so the tilted corners aren't cut */
+}
+
+#sidebar .cv-item .cv-peek img {
+  display: block;
+  width: var(--cv-w);
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto calc(.5rem - var(--cv-hide));   /* pulls the box up by the hidden part */
+  border: 0;                             /* no outline */
+  border-radius: 0 0 .6rem .6rem;        /* rounded only at the bottom */
+  transform-origin: 50% 0;
+  translate: 0 -105%;                    /* closed: fully hidden */
+  rotate: 0deg;
+  transition: translate .5s cubic-bezier(.22, 1, .36, 1),
+              rotate .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+#sidebar .cv-item:hover .cv-peek img,
+#sidebar .cv-item:has(.nav-link:focus-visible) .cv-peek img {
+  translate: 0 calc(-1 * var(--cv-hide));  /* top part stays behind the button */
+  rotate: var(--cv-tilt);
+}
+
+/* keep the CV link highlighted while the mouse is on the picture */
+#sidebar ul li.nav-item.cv-item:hover a.nav-link {
+  background-color: var(--sidebar-hover-bg);
+}
+
+#sidebar .cv-item:hover .nav-link > span::after {
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sidebar .cv-item .cv-peek,
+  #sidebar .cv-item .cv-peek img {
+    transition: none;
+  }
+}
+
+/* ---------- page hero ---------- */
+h1.hero {
+  display: block !important;
+  margin: clamp(1.5rem, 4vw, 3rem) 0 4.5rem;
+  font: 700 clamp(2.3rem, 1rem + 5vw, 4.25rem)/0.9 var(--pf-display);
+  letter-spacing: -0.02em;
+  text-transform: none;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--pf-paper);
+}
+
+h1.hero em {
+  font: inherit;
+  font-style: normal;
+  letter-spacing: inherit;
+  color: var(--pf-neon);
+}
+
+h1.hero:has(~ .content .pf-typer) {
+  margin-bottom: .75rem;
+  text-align: left !important;
+}
+
+h1.hero.hero--left {
+  margin-bottom: .75rem;
+  text-align: left;
+}
+
+.pf-typer {
+  min-height: 1.5em;
+  margin: 0 0 3.5rem;
+  font: 500 1.1rem/1.5 var(--pf-mono);
+  color: var(--text-muted-color);
+}
+
+.pf-cursor {
+  display: inline-block;
+  width: .55ch;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--pf-neon);
+  animation: pf-blink 1s steps(1) infinite;
+}
+
+/* solid while typing, blinks when idle */
+.pf-typer.is-typing .pf-cursor {
+  animation: none;
+}
+
+@keyframes pf-blink {
+  50% { opacity: 0; }
+}
+
+.share-wrapper {
+  display: none !important;
+}
+
+/* ---------- about page ---------- */
+.pf-section {
+  margin: 0 0 2.5rem;
+}
+
+.pf-section h2.pf-h {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 0;
+  font: 700 1.25rem/1.1 var(--pf-display);
+  letter-spacing: -0.01em;
+  color: var(--pf-paper);
+}
+
+.pf-section h2.pf-h::before {
+  content: none;
+}
+
+.pf-section p {
+  margin: 0 0 .9rem;
+}
+
+.pf-section strong {
+  font-weight: 600;
+  color: var(--pf-paper);
+}
+
+.pf-tl-title {
+  margin: 2.5rem 0 1.25rem;
+  font: 700 .8rem/1 var(--pf-display);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--pf-neon);
+}
+
+.pf-timeline {
+  --dot: 0.7rem;
+  --tl-line: rgb(170 186 197 / 30%);
+  position: relative;
+  display: grid;
+  gap: 1.75rem;
+  margin: 0 0 2.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--dot) / 2 - 1px);
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--tl-line) 8%, var(--tl-line) 92%, transparent);
+}
+
+.pf-timeline li {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 calc(var(--dot) + 1rem);
+}
+
+.pf-timeline li::before {
+  content: "";
+  position: absolute;
+  top: .05rem;
+  left: 0;
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 50%;
+  background: var(--pf-neon);
+}
+
+.pf-timeline time {
+  display: block;
+  font: 700 .8rem/1 var(--pf-display);
+  letter-spacing: .06em;
+  color: var(--pf-neon);
+}
+
+.pf-timeline h3 {
+  margin: .5rem 0 .2rem;
+  padding: 0;
+  font: 700 1.05rem/1.2 var(--pf-display);
+  color: var(--pf-paper);
+}
+
+.pf-timeline h3::before {
+  content: none;
+}
+
+.pf-timeline .pf-meta {
+  display: block;
+  margin-bottom: .6rem;
+  font-size: .8rem;
+  color: var(--text-muted-color);
+}
+
+.pf-timeline p {
+  margin: .35rem 0 0;
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 48rem) {
+  .pf-timeline {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .pf-timeline::before {
+    inset: auto 0 auto 0;
+    top: calc(var(--dot) / 2 - 1px);
+    width: auto;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--tl-line) 8%, var(--tl-line) 92%, transparent);
+  }
+
+  .pf-timeline li {
+    padding: calc(var(--dot) + 1rem) 0 0;
+  }
+
+  .pf-timeline li::before {
+    top: 0;
+  }
+}
+
+.pf-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1.25rem 1.5rem;
+  margin: 0 0 2.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-skills li {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin: 0;
+  font: 500 1rem/1.1 var(--pf-display);
+  color: var(--pf-paper);
+}
+
+.pf-ico {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: center / contain no-repeat;
+  transition: translate .2s;
+}
+
+.has-tip {
+  cursor: help;
+  outline: none;
+  text-decoration: underline dotted;
+  text-underline-offset: .35em;
+  text-decoration-color: rgba(170, 186, 197, .35);
+  transition: text-decoration-color .2s;
+}
+
+.has-tip:hover,
+.has-tip:focus-visible {
+  text-decoration-color: currentcolor;
+}
+
+.has-tip:hover .pf-ico,
+.has-tip:focus-visible .pf-ico {
+  translate: 0 -2px;
+}
+
+.pf-tip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10000;
+  max-width: 16rem;
+  padding: .8rem 1rem;
+  border: 2px solid var(--tip-ring, var(--pf-ring));
+  border-radius: .6rem;
+  background: var(--pf-panel);
+  color: var(--pf-paper);
+  font: 500 .85rem/1.35 var(--bs-body-font-family, system-ui);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.pf-tip.is-on {
+  opacity: 1;
+}
+
+/* ---------- contact page ---------- */
+.pf-contact-list {
+  display: grid;
+  gap: 1.1rem;
+  margin: 0 0 2.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-contact-list li {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 0;
+  font: 500 1.05rem/1.2 var(--pf-display);
+  color: var(--pf-paper);
+  overflow-wrap: anywhere;
+}
+
+.pf-contact-list a {
+  color: inherit;
+  border: 0;
+  transition: color .2s;
+}
+
+.pf-contact-list a:hover,
+.pf-contact-list a:focus-visible {
+  color: var(--pf-neon);
+}
+
+.pf-contact-list i {
+  flex: none;
+  width: 1.75rem;
+  text-align: center;
+  font-size: 1.25rem;
+  color: var(--pf-neon);
+}
+
+.pf-lead {
+  max-width: 34rem;
+  margin: 0 0 1.25rem;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.pf-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0 0 2.5rem;
+  font: 700 clamp(1.1rem, 0.7rem + 1.6vw, 1.7rem)/1.1 var(--pf-display);
+  color: var(--pf-paper);
+  border: 0;
+  overflow-wrap: anywhere;
+}
+
+.pf-mail:hover,
+.pf-mail:focus-visible {
+  color: var(--pf-neon);
+  border: 0;
+}
+
+.pf-divider {
+  margin: 0 0 1.75rem;
+  border: 0;
+  border-top: 1px solid rgba(170, 186, 197, .14);
+  opacity: 1;
+}
+
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .7rem 1.4rem;
+  border: 0;
+  border-radius: .8rem;
+  background: var(--pf-paper);
+  color: #0f0f0f;
+  font: 700 1rem/1 var(--pf-display);
+  text-transform: uppercase;
+  transition: background-color .3s, box-shadow .4s, scale .12s;
+}
+
+.pf-btn:hover,
+.pf-btn:focus-visible {
+  background: var(--pf-neon);
+  color: #0f0f0f;
+  box-shadow: 0 0 .8rem rgba(240, 152, 37, .7);
+}
+
+.pf-btn:active {
+  scale: .95;
+}
+
+/* ---------- disclaimer ---------- */
+.pf-disclaimer {
+  margin-top: 2rem;
+  font-size: .7rem;
+  line-height: 1.6;
+  color: var(--text-muted-color);
+}
+
+.pf-disclaimer p {
+  margin: 0 0 .25rem;
+}
+
+.content .pf-disclaimer a {
+  color: var(--text-muted-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  border-bottom: none;
+}
+
+.content .pf-disclaimer a:hover {
+  color: var(--text-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sidebar .nav-link span::after,
+  #sidebar .nav-link .cv-peek img,
+  .pf-btn,
+  .pf-ico {
+    transition: none;
+  }
+}
+
+/* ---------- transparent top bar ---------- */
+#topbar-wrapper {
+  height: 3rem;
+  background: transparent !important;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+#topbar {
+  background: transparent;
+}
+
+/* ---------- home page: About Me button ---------- */
+.pf-home-cta {
+  display: flex;
+  justify-content: center;
+  margin: 3rem 0 1rem;
+}
+
+.pf-home-cta .pf-btn {
+  padding: .6rem 1.5rem;
+  border: 1px solid var(--btn-border-color);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--link-color);
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: .2px;
+  text-transform: none;
+  box-shadow: none;
+  transition: all .35s ease-in-out;
+}
+
+.pf-home-cta .pf-btn i {
+  font-size: .85em;
+  transition: translate .25s ease-out;
+}
+
+.pf-home-cta .pf-btn:hover,
+.pf-home-cta .pf-btn:focus-visible {
+  background: var(--pf-neon);
+  border-color: var(--pf-neon);
+  color: #0f0f0f;
+  box-shadow: 0 0 .8rem rgb(240 152 37 / 45%);
+}
+
+.pf-home-cta .pf-btn:hover i,
+.pf-home-cta .pf-btn:focus-visible i {
+  translate: 3px 0;
+}
+
+.pf-home-social {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 1.5rem 0 0;
+  font-size: 1.4rem;
+}
+
+.content .pf-home-social a {
+  color: var(--text-muted-color);
+  border: 0;
+  transition: color .25s;
+}
+
+.content .pf-home-social a:hover,
+.content .pf-home-social a:focus-visible {
+  color: var(--pf-neon);
+}
+
+/* ---------- button text: left-to-right ascii decipher on hover ---------- */
+.pf-scramble {
+  position: relative;
+  display: inline;            /* was inline-block */
+}
+
+.pf-word {                    /* new */
+  white-space: nowrap;
+}
+
+.pf-scramble.is-scrambling .pf-sc {   /* was .pf-btn.is-scrambling .pf-sc */
+  display: inline-block;
+  text-align: center;
+}
+
+/* real text for screen readers; the per-letter spans are aria-hidden */
+.pf-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pf-sc {
+  white-space: pre;
+}
+
+/* lock each letter's width while animating so the button never jitters */
+.pf-btn.is-scrambling .pf-sc {
+  display: inline-block;
+  text-align: center;
+}
+
+.pf-sc.is-glyph {
+  font-family: var(--pf-mono);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Work display: LEDGER
+   ========================================================================== */
+
+/* ---------- shared base ---------- */
+.pf-works {
+  display: grid;
+  margin: 0;
+}
+
+.pf-work {
+  display: block;
+}
+
+.pf-work .pf-link {
+  display: block;
+  color: inherit;
+  border: 0;
+  text-decoration: none;
+}
+
+.pf-work .pf-link:hover {
+  color: inherit;
+  border: 0;
+  text-decoration: none;
+}
+
+.pf-shot {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: .15rem;
+  background: var(--pf-panel) var(--pf-noise-soft) 0 0 / 260px 260px;
+  /* same ring language as the old cards: grey on top, orange grows from under it */
+  --pf-card-ring: 1.5px;
+  box-shadow:
+    0 0 0 2px var(--pf-ring),
+    0 0 0 1px var(--pf-neon),
+    0 6px 18px 0 rgb(0 0 0 / 45%);
+  transition: box-shadow .18s cubic-bezier(.2, .9, .3, 1);
+  background: none;
+}
+
+.pf-work .pf-link:hover .pf-shot,
+.pf-work .pf-link:focus-visible .pf-shot {
+  box-shadow:
+    0 0 0 2px var(--pf-ring),
+    0 0 0 calc(2px + var(--pf-card-ring)) var(--pf-neon),
+    0 6px 18px 0 rgb(0 0 0 / 45%);
+}
+
+.pf-shot img {
+  border-radius: 0.1rem !important;
+  display: block;
+  border-radius: inherit;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter .2s, scale .6s var(--pf-ease);
+}
+
+.pf-shot .preview-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 0 !important;
+  background: none !important;
+  aspect-ratio: auto;
+}
+
+.pf-work .pf-link:hover .pf-shot img,
+.pf-work .pf-link:focus-visible .pf-shot img {
+  scale: 1.02;
+}
+
+/* empty layer reserved for the future ASCII effect (canvas / <pre> goes in here) */
+.pf-ascii {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  font: 10px/1 var(--pf-mono);
+  color: var(--pf-neon);
+  mix-blend-mode: screen;
+}
+
+.pf-title {
+  margin: 0;
+  padding: 0;
+  font: 700 clamp(1.5rem, 1rem + 2vw, 2.4rem)/.95 var(--pf-display);
+  letter-spacing: -.02em;
+  text-transform: none;
+  text-wrap: balance;
+  color: var(--pf-neon);
+  transition: color .25s;
+}
+
+.pf-title .pf-sc {
+  transition: color .2s;
+}
+
+.pf-title .pf-sc.is-lit {
+  color: #fff;
+}
+
+.pf-year,
+.pf-tags,
+.pf-idx,
+.pf-open,
+.pf-spec {
+  font: 500 .72rem/1.3 var(--pf-mono);
+  letter-spacing: .08em;
+  text-transform: lowercase;
+}
+
+.pf-year {
+  color: var(--pf-neon);
+}
+
+
+/* block-shade divider, plain text so the ASCII work can reuse it later */
+.pf-ledger .pf-work + .pf-work::before {
+  content: "░░▒▒▓▓▒░░▒▓▒░▓▒░░▓▓▒░▒▓░░▒▒▓░▒░▓▒▓░░▒░▓▒▒░▓░▒▓▒░░▓▒▓▒░▒▓░░▒▒▓▒░▓░▒▒░▓▓▒░░▒▓▒░▒░▓▒▓░░▒▒░▓▒░▒▓▒░▓░░▒▓▓▒░░▒▓▒░▒▓░▒▒▓░░▒▓▒";
+  display: block;
+  margin-bottom: var(--pf-gap);
+  overflow: hidden;
+  white-space: nowrap;
+  font: 12px/1 var(--pf-mono);
+  color: var(--pf-ring);
+}
+
+/* =====================================================================
+   B. LEDGER (compact): image + spec sheet, sides alternate
+   ===================================================================== */
+.pf-ledger {
+  --pf-gap: clamp(1.25rem, 3vw, 2rem);
+  gap: var(--pf-gap);
+}
+
+.pf-ledger .pf-link {
+  display: grid;
+  gap: .9rem;
+}
+
+/* flatter image to match the tighter rows */
+.pf-ledger .pf-shot {
+  aspect-ratio: 16 / 9;
+}
+
+.pf-ledger .pf-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+
+.pf-ledger .pf-title {
+  font-size: clamp(1.3rem, 1rem + 1.2vw, 1.9rem);
+}
+
+/* viewfinder corner marks on hover (from the Mosaic layout) */
+.pf-ledger .pf-shot::after {
+  --c: var(--pf-neon);
+  --l: 1.1rem;
+  content: "";
+  position: absolute;
+  inset: .85rem;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  scale: 1.04;
+  background:
+    linear-gradient(var(--c), var(--c)) left top / var(--l) 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) left top / 2px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) right top / var(--l) 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) right top / 2px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) left bottom / var(--l) 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) left bottom / 2px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) right bottom / var(--l) 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) right bottom / 2px var(--l) no-repeat;
+  transition: opacity .3s, scale .45s var(--pf-ease);
+}
+
+.pf-ledger .pf-link:hover .pf-shot::after,
+.pf-ledger .pf-link:focus-visible .pf-shot::after {
+  opacity: 1;
+  scale: 1;
+}
+
+.pf-ledger .pf-body {
+  display: grid;
+  gap: .7rem;
+  margin: .1rem 0 0;
+  padding: .6rem 0 0;
+  border-top: 1px solid var(--pf-ring);
+}
+
+.pf-ledger .pf-spec {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .25rem 1.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+.pf-ledger .pf-spec dt {
+  margin: 0;
+  color: var(--text-muted-color);
+}
+
+.pf-ledger .pf-spec dd {
+  margin: 0;
+  color: var(--pf-paper);
+}
+
+@media (min-width: 62rem) {
+  .pf-ledger .pf-link {
+    grid-template-columns: 5fr 7fr;
+    gap: 1.75rem;
+    align-items: stretch;
+  }
+
+  .pf-ledger .pf-info {
+    justify-content: flex-start;
+  }
+
+  .pf-ledger .pf-open {
+    margin-top: auto;
+  }
+
+  /* even rows flip sides */
+}
+
+.pf-ledger .pf-shot { order: 2; }
+
+.pf-desc {
+  margin: 0;
+  max-width: 48ch;
+  font-size: .95rem;
+  line-height: 1.5;
+  color: var(--text-muted-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-shot,
+  .pf-shot img,
+  .pf-shot::after,
+  .pf-open i,
+  .pf-title {
+    transition: none;
+  }
+}
+
+/* contact links + social buttons: gray */
+#access-contact a {
+  color: var(--text-muted-color) !important;
+  transition: color .25s;
+}
+
+#access-contact a:hover {
+  color: var(--text-color) !important;
+}
+
+#access-socials .post-tag {
+  --bs-btn-color: var(--text-muted-color);
+  --bs-btn-border-color: var(--pf-ring);
+  --bs-btn-hover-color: var(--text-color);
+  --bs-btn-hover-bg: transparent;
+  --bs-btn-hover-border-color: var(--text-muted-color);
+  --bs-btn-active-color: var(--text-color);
+  --bs-btn-active-bg: transparent;
+  --bs-btn-active-border-color: var(--text-muted-color);
+  color: var(--text-muted-color);
+  border-color: var(--pf-ring);
+}
+
+#access-socials .post-tag i {
+  margin-right: .25rem;
+  margin-top: 0.15rem;
+}
+
+#access-socials .post-tag:hover {
+  color: var(--text-color);
+  border-color: var(--text-muted-color);
+}
+
+#access-contact li {
+  color: var(--text-muted-color);
+}
+
+#access-contact li i {
+  width: 1.4rem;
+  margin-right: .35rem;
+  font-size: .85em;
+  text-align: center;
+  opacity: .65;
+}
+
+#panel-wrapper .access {
+  padding-left: clamp(.5rem, 3vw, 3.5rem);
+}
+
+.pf-cat {
+  position: fixed;
+  right: 2rem;
+  bottom: 1.5rem;
+  z-index: 1;               // was -1: behind the page, so clicks never reached it
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 12px/1.4 var(--pf-mono);
+  letter-spacing: 0;
+  white-space: pre;
+  color: var(--text-muted-color);
+  opacity: .5;
+  pointer-events: auto;     // was fill
+  user-select: text;        // was none, so the characters can be copied
+  cursor: pointer;
+  transition: opacity .3s;
+}
+.pf-cat.is-fx { opacity: 1; }
+
+// rows the shiver has passed turn neon
+.pf-cat em.lit {
+  font-style: normal;
+  color: var(--pf-neon);
+  text-shadow: 0 0 .5rem var(--pf-neon);
+}
+.pf-cat .nudge { display: inline-block; width: 5px; }
+
+.pf-cat span {
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
+}
+.pf-cat .w1 { width: 1ch; }
+.pf-cat .w2 { width: 2ch; }
+
+// speech bubble
+.pf-cat-say {
+  position: fixed;
+  z-index: 2;
+  max-width: 14rem;
+  padding: .45rem .8rem;
+  border: 2px solid var(--pf-neon);
+  border-radius: .6rem;
+  background: var(--pf-panel);
+  color: var(--pf-paper);
+  font: 500 .8rem/1.3 var(--pf-mono);
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 4px;
+  transition: opacity .2s, translate .25s var(--pf-ease);
+}
+.pf-cat-say.is-on { opacity: 1; translate: 0 0; }
+
+@media (max-width: 991px) {
+  .pf-cat, .pf-cat-say { display: none; }
+}
+
+
+
+#sidebar .nav-sub {
+  list-style: none;
+  margin: .1rem 0 .4rem 1.55rem;        // guide line sits under the home icon
+  padding: 0 0 0 .7rem;
+  border-left: 1px solid var(--pf-ring);
+}
+
+#sidebar .nav-sub-item {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// no browser bullets / dot markers
+#sidebar .nav-sub-item::marker { content: none; }
+
+// short tick joining each project to the guide line
+#sidebar .nav-sub-item::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -.7rem;
+  width: .45rem;
+  height: 1px;
+  background: var(--pf-ring);
+}
+
+#sidebar .nav-sub-link {
+  display: flex;
+  align-items: center;
+  padding: .4rem .75rem;
+  margin-bottom: .1rem;
+  border: 0;
+  border-radius: .2rem;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #6f6f6f;
+  transition: background-color .25s;
+}
+
+#sidebar .nav-sub-link > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// hover: only the faint background tint, text colour unchanged
+#sidebar .nav-sub-link:hover,
+#sidebar .nav-sub-link:focus-visible {
+  color: #6f6f6f;
+  background-color: rgb(240 152 37 / 4%);
+}
+
+// active project keeps its muted warm text and slightly stronger tint
+#sidebar .nav-sub-item.active .nav-sub-link {
+  color: #b98a4e;
+  background-color: rgb(240 152 37 / 5%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sidebar .nav-sub-link { transition: none; }
+}
