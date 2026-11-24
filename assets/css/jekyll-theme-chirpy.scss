@@ -100,7 +100,6 @@ body::before {
   z-index: -1;
   pointer-events: none;
   opacity: .1;
-  mix-blend-mode: overlay;
   background: var(--pf-noise) 0 0 / 260px 260px;
 }
 
