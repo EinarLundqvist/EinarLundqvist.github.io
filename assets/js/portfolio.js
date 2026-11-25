@@ -273,9 +273,9 @@
 (function () {
   var TICK = 100;                       // ms per animation step
   var GLYPHS = '.:-=+*#%@01/\\|<>'.split('');
-  var SHIVER_MS = 900, BAND = 2, HOLD = 2700-900, SAY_MS = 2700;
+  var SHIVER_MS = 900, BAND = 2, HOLD = SAY_MS-SHIVER_MS, SAY_MS = 2700;
   var LINES = [
-    'you found me', 'I need shell texturing', 'pet count: +1', 'I hate water! Especially wet water!', '"Fear me, if you dare!"', 'planning my revenge on Schrödinger', '"I hate mondays"', 
+    'you found me', 'I need shell texturing', 'I hate water! Especially wet water!', '"Fear me, if you dare!"', 'planning my revenge on Schrödinger', '"I hate mondays"', 
   ];
 
   var BODY = [

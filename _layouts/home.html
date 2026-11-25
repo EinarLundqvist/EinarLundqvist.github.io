@@ -65,11 +65,21 @@ layout: default
       
         <div class="pf-body">
           {%- assign pf_desc = post.description | default: post.excerpt | strip_html | strip_newlines | truncate: 140 -%}
-          {%- if pf_desc != '' -%}<p class="pf-desc">{{ pf_desc }}</p>{%- endif -%}
-      
+          <p class="pf-desc">{{ pf_desc }} <span class="pf-year">{{ post.date | date: '%Y' }}</span></p>
+        
           <dl class="pf-spec">
-            <dt>year</dt><dd>{{ post.date | date: '%Y' }}</dd>
-            {% if post.categories.size > 0 %}<dt>type</dt><dd>{{ post.categories | join: ', ' }}</dd>{% endif %}
+            {% if post.categories.size > 0 %}<dd>{{ post.categories | join: ', ' }}</dd>{% endif %}
+            {% if post.tools %}
+              <dd class="pf-tools">
+                {%- for tool in post.tools -%}
+                  {%- assign pf_name = tool.name | default: tool -%}
+                  <span class="pf-tool">
+                    {%- if tool.icon -%}<span class="pf-tool-ico" style="background-image:url('{{ tool.icon | relative_url }}')" aria-hidden="true"></span>{%- endif -%}
+                    {{ pf_name }}
+                  </span>
+                {%- endfor -%}
+              </dd>
+            {% endif %}
           </dl>
         </div>
       </div>
