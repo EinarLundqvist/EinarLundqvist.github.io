@@ -35,7 +35,6 @@ order: 1
 {% include pf-skill.html name="Python" icon="Python.png" %}
 {% include pf-skill.html name="Python Plugins" icon="Blender.png" %}
 {% include pf-skill.html name="Shaderlab" icon="Shaderlab.png" %}
-{% include pf-skill.html name="DirectX 11" icon="DirectX11.png" %}
 </ul>
 </section>
 
@@ -54,6 +53,6 @@ order: 1
 </ul>
 </section>
 
-<p><a class="pf-btn" href="{{ '/assets/resume.pdf' | relative_url }}" target="_blank" rel="noopener">CV <i class="fas fa-arrow-up-right-from-square"></i></a></p>
+<p class="pf-home-cta"><span class="pf-cv-wrap"><a class="pf-btn" href="{{ '/assets/resume.pdf' | relative_url }}" target="_blank" rel="noopener">CV <i class="fas fa-arrow-up-right-from-square"></i></a><a class="pf-cv-pop" href="{{ '/assets/resume.pdf' | relative_url }}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><span style="background-image:url('/assets/img/cvpreview.png')"></span></a></span></p>
 
 <p class="pf-disclaimer">All trademarked logos are the property of their owners and are not shown for affiliation.</p>

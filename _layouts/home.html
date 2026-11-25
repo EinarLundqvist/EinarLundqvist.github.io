@@ -56,7 +56,11 @@ layout: default
     <article class="pf-work">
       <a href="{{ post.url | relative_url }}" class="pf-link">
         <div class="pf-shot">
-          {% if pf_src != '' %}<img src="{{ pf_src }}" alt="{{ pf_alt }}" loading="lazy">{% endif %}
+          {% if post.video %}
+          <video src="{{ post.video | relative_url }}" {% if pf_src != '' %}poster="{{ pf_src }}"{% endif %} autoplay loop muted playsinline disablepictureinpicture aria-label="{{ post.title | xml_escape }}"></video>
+            {% elsif pf_src != '' %}
+              <img src="{{ pf_src }}" alt="{{ pf_alt }}" loading="lazy">
+            {% endif %}
           <div class="pf-ascii" aria-hidden="true"></div>
         </div>
 
@@ -92,6 +96,8 @@ layout: default
   {% include post-paginator.html %}
 {% endif %}
 
-<p class="pf-home-cta">
-  <a class="pf-btn" href="{{ '/about/' | relative_url }}">About Me <i class="fas fa-arrow-right"></i></a>
-</p>
+<div class="content">
+  <p class="pf-home-cta">
+    <a class="pf-btn" href="{{ '/about/' | relative_url }}">About Me <i class="fas fa-arrow-right"></i></a>
+  </p>
+</div>

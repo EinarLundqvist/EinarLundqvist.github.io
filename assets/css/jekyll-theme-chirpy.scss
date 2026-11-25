@@ -234,7 +234,7 @@ html::-webkit-scrollbar-thumb {
   height: auto;
   margin: 0 auto calc(.5rem - var(--cv-hide));   /* pulls the box up by the hidden part */
   border: 0;                             /* no outline */
-  border-radius: 0 0 .6rem .6rem;        /* rounded only at the bottom */
+  border-radius: .2rem;        /* rounded only at the bottom */
   transform-origin: 50% 0;
   translate: 0 -105%;                    /* closed: fully hidden */
   rotate: 0deg;
@@ -635,8 +635,8 @@ h1.hero.hero--left {
   gap: .5rem;
   padding: .7rem 1.4rem;
   border: 0;
-  border-radius: .8rem;
-  background: var(--pf-paper);
+  border-radius: .2rem;
+  background: var(--pf-neon);
   color: #0f0f0f;
   font: 700 1rem/1 var(--pf-display);
   text-transform: uppercase;
@@ -647,6 +647,7 @@ h1.hero.hero--left {
 .pf-btn:focus-visible {
   background: var(--pf-neon);
   color: #0f0f0f;
+  filter: brightness(1.15);
   box-shadow: 0 0 .8rem rgba(240, 152, 37, .7);
 }
 
@@ -705,39 +706,9 @@ h1.hero.hero--left {
   display: flex;
   justify-content: center;
   margin: 3rem 0 1rem;
+  border-radius: 3px;
 }
 
-.pf-home-cta .pf-btn {
-  padding: .6rem 1.5rem;
-  border: 1px solid var(--btn-border-color);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--link-color);
-  font: inherit;
-  font-weight: 600;
-  letter-spacing: .2px;
-  text-transform: none;
-  box-shadow: none;
-  transition: all .35s ease-in-out;
-}
-
-.pf-home-cta .pf-btn i {
-  font-size: .85em;
-  transition: translate .25s ease-out;
-}
-
-.pf-home-cta .pf-btn:hover,
-.pf-home-cta .pf-btn:focus-visible {
-  background: var(--pf-neon);
-  border-color: var(--pf-neon);
-  color: #0f0f0f;
-  box-shadow: 0 0 .8rem rgb(240 152 37 / 45%);
-}
-
-.pf-home-cta .pf-btn:hover i,
-.pf-home-cta .pf-btn:focus-visible i {
-  translate: 3px 0;
-}
 
 .pf-home-social {
   display: flex;
@@ -1150,7 +1121,7 @@ h1.hero.hero--left {
   max-width: 14rem;
   padding: .45rem .8rem;
   border: 2px solid var(--pf-neon);
-  border-radius: .6rem;
+  border-radius: 3px;
   background: var(--pf-panel);
   color: var(--pf-paper);
   font: 500 .8rem/1.3 var(--pf-mono);
@@ -1233,4 +1204,170 @@ h1.hero.hero--left {
 
 @media (prefers-reduced-motion: reduce) {
   #sidebar .nav-sub-link { transition: none; }
+}
+
+/* link hover: neon text and underline */
+a:not(.post-tag, .pf-btn, .pf-link, .img-link):hover,
+a:not(.post-tag, .pf-btn, .pf-link, .img-link):hover * {
+  color: var(--pf-neon) !important;
+  border-bottom-color: var(--pf-neon) !important;
+  text-decoration-color: var(--pf-neon) !important;
+}
+
+
+/* ---------- CV button preview ---------- */
+.pf-cv-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+/* wider CV button */
+.pf-cv-wrap .pf-btn {
+  justify-content: center;
+  min-width: 12rem;
+}
+
+.pf-cv-pop {
+  position: absolute;
+  bottom: 100%;             /* sits above the button */
+  left: 50%;
+  translate: -54.5% 0;   /* was -50% 0 */
+  z-index: 5;
+  width: 11rem;
+  padding: 1.5rem 1rem 0;   /* room for the tilted corners */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pf-cv-pop > span {
+  display: block;
+  aspect-ratio: 210 / 297;  /* A4 page */
+  background: top center / cover no-repeat;
+  border-radius: .2rem;
+  transform-origin: 50% 100%;
+  translate: 0 110%;        /* closed: hidden behind the button's top edge */
+  transition: translate .5s var(--pf-ease), rotate .5s var(--pf-ease);
+}
+
+.pf-cv-wrap:hover .pf-cv-pop > span,
+.pf-cv-wrap:has(.pf-btn:focus-visible) .pf-cv-pop > span {
+  translate: 0 40%;         /* open: lower number = slides out further */
+  rotate: 5deg;
+}
+
+/* pulled-out CV stays open and is clickable */
+.pf-cv-wrap:hover .pf-cv-pop > span,
+.pf-cv-wrap:has(.pf-btn:focus-visible) .pf-cv-pop > span {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* no link underline around the picture */
+.content a.pf-cv-pop,
+.content a.pf-cv-pop:hover {
+  border: 0 !important;
+  text-decoration: none !important;
+}
+
+#sidebar #avatar img {
+  transition: scale .3s ease !important;
+}
+
+#sidebar #avatar img,
+#sidebar #avatar:hover img {
+  transform: none !important;   /* removes the theme's larger zoom */
+}
+
+#sidebar #avatar:hover img {
+  scale: 1.05 !important;       /* 5% zoom */
+}
+
+.pf-shot video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: .1rem;
+  transition: scale .6s var(--pf-ease);
+}
+
+.pf-work .pf-link:hover .pf-shot video,
+.pf-work .pf-link:focus-visible .pf-shot video {
+  scale: 1.02;
+}
+
+/* no zoom on project previews */
+.pf-work .pf-link:hover .pf-shot img,
+.pf-work .pf-link:focus-visible .pf-shot img,
+.pf-work .pf-link:hover .pf-shot video,
+.pf-work .pf-link:focus-visible .pf-shot video {
+  scale: 1;
+}
+
+
+/* video at the top of a post */
+.pf-post-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: .15rem;
+}
+
+
+/* video arrows and dots */
+.pf-carousel { position: relative; }
+
+.pf-arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 10%;
+  background: rgb(0 0 0 / 20%);
+  color: #fff;
+  font-size: .75rem;
+  opacity: .6;
+  transition: opacity .15s, background-color .15s;
+}
+
+.pf-prev { left: .75rem; }
+.pf-next { right: .75rem; }
+
+.pf-arrow:hover,
+.pf-arrow:focus-visible {
+  background: rgb(0 0 0 / 35%);
+  opacity: 1;
+}
+
+.pf-dots {
+  position: absolute;
+  bottom: .5rem;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .4rem .65rem;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 20%);
+}
+
+.pf-dot {
+  flex: none;
+  width: .35rem;
+  height: .35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  opacity: .35;
+}
+
+.pf-dot.is-on {
+  opacity: 1;
 }

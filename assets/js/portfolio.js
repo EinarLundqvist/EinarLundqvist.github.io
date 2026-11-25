@@ -83,9 +83,12 @@
     });
     wrap.appendChild(sr);
     wrap.appendChild(vis);
+    var raw = node.textContent;
+    if (/^\s/.test(raw)) el.insertBefore(document.createTextNode(' '), node);
+    if (/\s$/.test(raw)) el.insertBefore(document.createTextNode(' '), node.nextSibling);
     el.replaceChild(wrap, node);
 
-    var running = false;
+    var raf = 0;
     var hovering = false;
 
     function setChar(i, value, glyph) {
@@ -95,8 +98,7 @@
     }
 
     function run() {
-      if (running) return;
-      running = true;
+      cancelAnimationFrame(raf);   // stop any run in progress
 
       var widths = chars.map(function (s) { return s.getBoundingClientRect().width; });
       wrap.classList.add('is-scrambling');
@@ -129,7 +131,7 @@
           chars[i].classList.toggle('is-lit', hovering && d >= 0);
         }
 
-        if (t < 1) requestAnimationFrame(frame);
+        if (t < 1) raf = requestAnimationFrame(frame);
         else {
           chars.forEach(function (s, i) {
             setChar(i, orig[i], false);
@@ -137,10 +139,9 @@
             s.classList.toggle('is-lit', hovering);
           });
           wrap.classList.remove('is-scrambling');
-          running = false;
         }
       }
-      requestAnimationFrame(frame);
+      raf = requestAnimationFrame(frame)
     }
 
     function on() { hovering = true; run(); }
@@ -160,7 +161,14 @@
   function init() {
     document.querySelectorAll('.pf-btn').forEach(function (b) { setup(b, b); });
     document.querySelectorAll('.pf-title').forEach(function (t) {
-      setup(t, t.closest('.pf-link') || t);
+    setup(t, t.closest('.pf-link') || t);
+
+    // all other text links
+    var LINKS = '.content a, #panel-wrapper a, footer a, #breadcrumb a';
+    var SKIP = '.pf-btn, .pf-link, .img-link, .popup, .anchor';
+    document.querySelectorAll(LINKS).forEach(function (a) {
+      if (!a.matches(SKIP)) setup(a, a);
+    });
     });
     // sidebar: main nav buttons + project sub-links
     document.querySelectorAll('#sidebar .nav-link > span, #sidebar .nav-sub-link > span').forEach(function (s) {
@@ -273,10 +281,8 @@
 (function () {
   var TICK = 100;                       // ms per animation step
   var GLYPHS = '.:-=+*#%@01/\\|<>'.split('');
-  var SHIVER_MS = 900, BAND = 2, HOLD = SAY_MS-SHIVER_MS, SAY_MS = 2700;
-  var LINES = [
-    'you found me', 'I need shell texturing', 'I hate water! Especially wet water!', '"Fear me, if you dare!"', 'planning my revenge on Schrödinger', '"I hate mondays"', 
-  ];
+  var SHIVER_MS = 900, BAND = 2, SAY_MS = 2700, HOLD = SAY_MS - SHIVER_MS;
+  var LINES = ['I need shell texturing', 'Planning my revenge on Schrödinger', '"I hate mondays"', 'I hate water! Especially wet water!', '"Fear me, if you dare!"'];
 
   var BODY = [
     ' ／l、',
@@ -374,10 +380,13 @@
       }, 50);
     }
 
-    var bag = [], sayTimer = 0;
+    var sayTimer = 0;
     function say() {
-      if (!bag.length) bag = LINES.slice().sort(function () { return Math.random() - .5; });
-      bubble.textContent = bag.pop();
+      var next = 0;
+      try { next = Number(sessionStorage.getItem('pf-cat-line')) || 0; } catch (e) {}
+      bubble.textContent = LINES[next % LINES.length];
+      try { sessionStorage.setItem('pf-cat-line', (next + 1) % LINES.length); } catch (e) {}
+
       var r = pre.getBoundingClientRect();
       bubble.style.right = Math.max(8, innerWidth - r.right) + 'px';
       bubble.style.bottom = (innerHeight - r.top + 10) + 'px';
@@ -417,4 +426,55 @@
   else init();
 
   if (typeof module !== 'undefined') module.exports = { draw: draw, toHtml: toHtml, isWide: isWide };
+})();
+
+
+
+/* Arrow buttons and dots that cycle through a post's videos */
+(function () {
+  function init() {
+    document.querySelectorAll('.pf-carousel').forEach(function (box) {
+      var list = (box.dataset.videos || '').split('|').filter(Boolean);
+      if (list.length < 2) return;
+      var video = box.querySelector('video');
+      var i = 0;
+
+      var bar = document.createElement('div');
+      bar.className = 'pf-dots';
+      var dots = list.map(function (src, n) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'pf-dot';
+        dot.setAttribute('aria-label', 'Video ' + (n + 1) + ' of ' + list.length);
+        dot.addEventListener('click', function () { show(n); });
+        bar.appendChild(dot);
+        return dot;
+      });
+      box.appendChild(bar);
+
+      function mark() {
+        dots.forEach(function (dot, n) {
+          dot.classList.toggle('is-on', n === i);
+          dot.setAttribute('aria-current', n === i ? 'true' : 'false');
+        });
+      }
+
+      function show(n) {
+        n = (n + list.length) % list.length;
+        if (n === i) return;
+        i = n;
+        video.removeAttribute('poster');
+        video.src = list[i];
+        video.play().catch(function () {});
+        mark();
+      }
+
+      box.querySelector('.pf-prev').addEventListener('click', function () { show(i - 1); });
+      box.querySelector('.pf-next').addEventListener('click', function () { show(i + 1); });
+      mark();
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();

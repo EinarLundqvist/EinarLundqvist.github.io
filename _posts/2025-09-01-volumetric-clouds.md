@@ -15,6 +15,16 @@ tools:
 image:
     path: /assets/img/work-2.png
     alt: Volumetric Clouds
+
+video: /assets/vid/clouds_loop.mp4
+videos:
+  - /assets/vid/VID_VolumetricClouds_0.mp4
+  - /assets/vid/VID_VolumetricClouds_1.mp4
+  - /assets/vid/VID_VolumetricClouds_2.mp4
+  - /assets/vid/VID_VolumetricClouds_3.mp4
+
+description: Real-time volumetric clouds made in Unity with HLSL.
 ---
 
-Placeholder: project description for Project Two coming soon.
+
+Placeholder: project description for Volumetric Clouds coming soon.
