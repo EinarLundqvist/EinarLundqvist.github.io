@@ -351,6 +351,47 @@ h1.hero.hero--left {
   color: var(--pf-paper);
 }
 
+
+.pf-portrait {
+  position: relative;
+  float: right;
+  width: 14rem;        /* same as the image width */
+  height: 19rem;       /* shorter than the image: only the bottom spills into the text */
+  margin: -4rem 6rem 0 0;  /* no right margin: image edge lines up with the timeline's right edge */
+}
+
+.pf-portrait img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16rem;
+  height: auto;
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+  filter: drop-shadow(0 0 .6rem rgb(0 0 0 / 22%));
+}
+
+.pf-tl-title {
+  clear: both;
+}
+
+@media (max-width: 35rem) {
+  .pf-portrait {
+    float: none;
+    width: 13rem;
+    height: auto;
+    margin: 0 auto 1.5rem;
+  }
+
+  .pf-portrait img {
+    position: static;
+    width: 100%;
+  }
+}
+
 .pf-tl-title {
   margin: 2.5rem 0 1.25rem;
   font: 700 .8rem/1 var(--pf-display);
@@ -779,11 +820,19 @@ h1.hero.hero--left {
 /* ---------- shared base ---------- */
 .pf-works {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* add */
   margin: 0;
 }
 
 .pf-work {
   display: block;
+  min-width: 0;                            /* add */
+}
+
+.pf-ledger .pf-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* add */
+  gap: .9rem;
 }
 
 .pf-work .pf-link {
@@ -1370,4 +1419,114 @@ a:not(.post-tag, .pf-btn, .pf-link, .img-link):hover * {
 
 .pf-dot.is-on {
   opacity: 1;
+}
+
+/* About Me button in the project nav */
+.post-navigation a.btn.btn-outline-primary.pf-nav-about {
+  align-self: stretch;
+  text-decoration: none;
+  color: var(--pf-neon);
+  background: transparent;
+  border-radius: 0px .6rem .6rem 0px;
+  transition: background-color .3s, box-shadow .4s, color .2s;
+}
+
+/* border + outline in every state (the theme's blue is !important, so each state needs its own selector) */
+.post-navigation a.btn.btn-outline-primary.pf-nav-about,
+.post-navigation a.btn.btn-outline-primary.pf-nav-about:hover,
+.post-navigation a.btn.btn-outline-primary.pf-nav-about:focus,
+.post-navigation a.btn.btn-outline-primary.pf-nav-about:focus-visible,
+.post-navigation a.btn.btn-outline-primary.pf-nav-about:active,
+.post-navigation a.btn.btn-outline-primary.pf-nav-about:visited {
+  border-color: var(--pf-neon) !important;
+  outline: 0 !important;
+}
+/* hover: filled neon with a glow */
+.post-navigation a.btn.btn-outline-primary.pf-nav-about:hover,
+.post-navigation a.btn.btn-outline-primary.pf-nav-about:focus-visible {
+  background-color: rgba(228, 161, 73, .35);
+  box-shadow: 0 0 .8rem rgba(240, 152, 37, .4);
+}
+
+.post-navigation a.btn.btn-outline-primary:not(.pf-nav-about),
+.post-navigation a.btn.btn-outline-primary:not(.pf-nav-about):focus,
+.post-navigation a.btn.btn-outline-primary:not(.pf-nav-about):active {
+  border-color: var(--pf-neon) !important;
+  color: var(--pf-neon);
+}
+
+.post-navigation a.btn.btn-outline-primary:not(.pf-nav-about):hover,
+.post-navigation a.btn.btn-outline-primary:not(.pf-nav-about):focus-visible,
+.post-navigation a.btn.btn-outline-primary:not(.pf-nav-about):active {
+  background-color: rgba(228, 161, 73, .1) !important;
+  border-color: var(--pf-neon) !important;
+}
+/* stacked layout (image under the title): space goes BELOW the divider */
+@media (max-width: 61.99rem) {
+  .pf-ledger .pf-work + .pf-work::before {
+    margin-bottom: 2.5rem;           /* space between the divider and the project under it */
+  }
+}
+
+#topbar-wrapper #topbar-title {
+  position: relative;
+  font: 700 1.55rem/1.1 var(--pf-display);
+  letter-spacing: -.01em;
+}
+
+#topbar-wrapper #topbar-title::after {
+  content: "Technical Artist";
+  display: block;
+  margin-top: .15rem;
+  font: 500 .62rem/1.2 var(--pf-mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+}
+
+/* ---------- bent image strip (paste at the end of jekyll-theme-chirpy.scss) ---------- */
+.pf-bend {
+  position: relative;
+  z-index: 2;                  /* above the ascii cat (z-index 1), so images scroll over it */
+  margin: 0;                   /* width, left offset and top gap are set by JS */
+  max-width: none;
+  opacity: 0;
+  transition: opacity .6s var(--pf-ease);
+
+  &.is-ready { opacity: 1; }
+}
+
+.pf-bend-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3.4 / 1;       /* reference was 2.7 / 1; larger number = shorter, smaller strip */
+  cursor: default;
+  touch-action: pan-y;         /* vertical page scroll still works on touch */
+  user-select: none;
+
+  &.is-over { cursor: grab; }      /* only while hovering an image */
+  &.is-drag { cursor: grabbing; }
+}
+
+.pf-bend-src { display: none; }
+
+@media (max-width: 849px) {
+  .pf-bend-canvas { aspect-ratio: 2.1 / 1; }
+}
+
+/* ---------- About Me button: less space under the project list ---------- */
+.pf-home-cta {
+  position: relative;
+  z-index: 3;                  /* always above the strip's canvas, so the button stays clickable */
+  margin: 1.5rem 0 0;          /* was 3rem 0 1rem */
+  justify-content: flex-start; /* was center: button now sits on the left */
+}
+
+@media (max-width: 1199px) {
+  #back-to-top, .pf-cat, .pf-cat-say {
+    display: none !important;
+  }
+}
+@media (max-width: 991px) {
+  .pf-bend { display: none; }
 }

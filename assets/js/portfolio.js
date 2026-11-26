@@ -287,7 +287,7 @@
   var BODY = [
     ' ／l、',
     '=({l}､ {r} ７',
-    '  >   <⸜⸌   ',
+    '  >  <⸜⸌   ',
     '  | ､  ヽ､',
     '  ししf_¨)'
   ];
@@ -429,7 +429,6 @@
 })();
 
 
-
 /* Arrow buttons and dots that cycle through a post's videos */
 (function () {
   function init() {
@@ -464,8 +463,15 @@
         if (n === i) return;
         i = n;
         video.removeAttribute('poster');
+        video.muted = true;
         video.src = list[i];
-        video.play().catch(function () {});
+        video.load();
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});
+        video.addEventListener('canplay', function onReady() {
+          video.removeEventListener('canplay', onReady);
+          if (video.paused) video.play().catch(function () {});
+        });
         mark();
       }
 
@@ -477,4 +483,72 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+})();
+
+
+
+/* Make muted looping videos start reliably */
+(function () {
+  function tryPlay(v) {
+    v.muted = true;          // set the property, not just the attribute
+    v.defaultMuted = true;
+    v.playsInline = true;
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+
+  function setup(v) {
+    if (v.dataset.apReady) return;
+    v.dataset.apReady = '1';
+
+    var visible = true;
+
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+
+    // retry as data arrives
+    ['loadedmetadata', 'loadeddata', 'canplay', 'canplaythrough'].forEach(function (ev) {
+      v.addEventListener(ev, function () {
+        if (v.paused && visible) tryPlay(v);
+      });
+    });
+
+    // play when on screen, pause when off screen
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible) tryPlay(v); else v.pause();
+      }, { threshold: 0.1 }).observe(v);
+    } else {
+      tryPlay(v);
+    }
+
+    tryPlay(v);
+  }
+
+  function init() {
+    var vids = document.querySelectorAll('video[autoplay], .pf-carousel video, .pf-post-video');
+    vids.forEach(setup);
+  }
+
+  // recover when the tab or page comes back (tab switch, back/forward cache)
+  function resume() {
+    document.querySelectorAll('video[data-ap-ready]').forEach(function (v) {
+      if (v.paused) tryPlay(v);
+    });
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) resume();
+  });
+  window.addEventListener('pageshow', resume);
+
+  // last resort: first user interaction (e.g. Low Power Mode on iOS)
+  ['pointerdown', 'touchstart', 'keydown', 'scroll'].forEach(function (ev) {
+    window.addEventListener(ev, resume, { once: true, passive: true });
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  window.addEventListener('load', init); // catches anything injected late
 })();

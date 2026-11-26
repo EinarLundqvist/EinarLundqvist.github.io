@@ -3,9 +3,12 @@ title: About Me
 icon: fas fa-user
 order: 1
 ---
+<figure class="pf-portrait" style="shape-outside: url('{{ '/assets/img/about.png' | relative_url }}');">
+  <img src="{{ '/assets/img/portrait.png' | relative_url }}" alt="Einar Lundqvist" loading="lazy">
+</figure>
 <p class="pf-typer" data-phrases="Architecture enjoyer|Blue noise <3|Guessr gamer|Coffee powered"></p>
 <section class="pf-section">
-<p>Technical Artist med inriktning shaders och video game graphics. Studerar Procedural Art på The Game Assembly (TGA) i Stockholm och har en backgrund i spelprogrammering. Använder Unreal Engine, Unity och TGAs egenbyggda spelmotor och vill fortsätta arbeta med att utforska/utveckla nya tekniker inom spel. Jag har erfarenhet av projektbaserad spelutveckling i grupp på arbetssätt som Scrum med noggrann uppgifts- och tidsplanering. Jag gillar problemlösning, strukturerat arbete och är van vid att kombinera individuella projekt med gruppprojekt. <strong>Jag söker en praktikplats i höst (2027)</strong> där jag kan utvecklas inom tech art.</p>
+<p>Im a Technical Artist med fokus på shaders. Jag Studerar Procedural Art på The Game Assembly (TGA) i Stockholm och har en backgrund i spelprogrammering. <strong>Jag söker en praktikplats i höst (2027)</strong> där jag kan utvecklas vidar inom tech art och få nya kunskaper inom shaders, rendering och video game graphics.</p>
 </section>
 
 <h2 class="pf-tl-title">Utbildning</h2>

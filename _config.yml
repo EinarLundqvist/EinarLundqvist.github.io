@@ -99,7 +99,7 @@ theme_mode: dark # [light | dark]  (dark only: this also hides the light/dark to
 cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar: /assets/img/portrait.png # put your portrait at assets/img/portrait.png
+avatar: /assets/img/portrait_Small.png
 
 # The URL of the site-wide social preview image used in SEO `og:image` meta tag.
 # It can be overridden by a customized `page.image` in front matter.

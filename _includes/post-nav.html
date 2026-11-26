@@ -1,0 +1,54 @@
+{%- comment -%}
+  Previous / next project, in the same order as the home page:
+  pinned posts first, then the rest (newest first), skipping hidden ones.
+  When there is no next project, the right-hand slot shows the About Me button.
+{%- endcomment -%}
+{% assign pf_pinned = site.posts | where: 'pin', 'true' %}
+{% assign pf_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
+{% assign pf_ordered = pf_pinned | concat: pf_normal %}
+
+{% assign pf_found = false %}
+{% assign pf_idx = 0 %}
+{% for p in pf_ordered %}
+  {% if p.url == page.url %}
+    {% assign pf_found = true %}
+    {% assign pf_idx = forloop.index0 %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% assign pf_prev = nil %}
+{% assign pf_next = nil %}
+{% if pf_found %}
+  {% if pf_idx > 0 %}
+    {% assign pf_prev_idx = pf_idx | minus: 1 %}
+    {% assign pf_prev = pf_ordered[pf_prev_idx] %}
+  {% endif %}
+  {% assign pf_next_idx = pf_idx | plus: 1 %}
+  {% assign pf_next = pf_ordered[pf_next_idx] %}
+{% endif %}
+
+<nav class="post-navigation d-flex justify-content-between align-items-center" aria-label="Project Navigation">
+  {% if pf_prev %}
+    <a href="{{ pf_prev.url | relative_url }}" class="btn btn-outline-primary" aria-label="Previous project">
+      <p>{{ pf_prev.title }}</p>
+    </a>
+  {% else %}
+    <div class="btn btn-outline-primary disabled" aria-label="Previous project">
+      <p>-</p>
+    </div>
+  {% endif %}
+
+  {% if pf_next %}
+    <a href="{{ pf_next.url | relative_url }}" class="btn btn-outline-primary" aria-label="Next project">
+      <p>{{ pf_next.title }}</p>
+    </a>
+    {% else %}
+    <a href="{{ '/about/' | relative_url }}" class="btn btn-outline-primary pf-nav-about" aria-label="Next">
+      <p>
+        <span class="pf-scramble"><span class="pf-sr">About Me</span><span aria-hidden="true"><span class="pf-word"><span class="pf-sc">A</span><span class="pf-sc">b</span><span class="pf-sc">o</span><span class="pf-sc">u</span><span class="pf-sc">t</span></span> <span class="pf-word"><span class="pf-sc">M</span><span class="pf-sc">e</span></span></span></span>
+        <i class="fas fa-arrow-right"></i>
+      </p>
+    </a>
+  {% endif %}
+</nav>

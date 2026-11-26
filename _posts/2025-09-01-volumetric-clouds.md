@@ -16,7 +16,7 @@ image:
     path: /assets/img/work-2.png
     alt: Volumetric Clouds
 
-video: /assets/vid/clouds_loop.mp4
+video: /assets/vid/VID_VolumetricClouds_loop.mp4
 videos:
   - /assets/vid/VID_VolumetricClouds_0.mp4
   - /assets/vid/VID_VolumetricClouds_1.mp4
