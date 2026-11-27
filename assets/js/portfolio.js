@@ -552,3 +552,259 @@
   else init();
   window.addEventListener('load', init); // catches anything injected late
 })();
+
+
+
+
+(function () {
+  /* ---- settings (from your effect panel) ---- */
+  var CFG = {
+    posX: 0.493,        // Position X 49.3
+    posY: 0.82,         // pivot the strip stretches from (measured from your reference)
+    stretchY: 1.0,      // Stretch Y 100
+    amount: 39,         // Amount
+    flat: 0.247,        // half-width fraction around the centre that stays perfectly flat
+    reach: 0.477,       // how far (fraction of width) the ease-in-out-cubic ramp runs past the flat zone
+    dispersion: 100,    // Chrom. Dispersion
+    sides: 2,           // Two (symmetric left/right)
+    speed: 28,          // px/sec auto-drift (0 = static)
+    gap: 104,           // px between the About Me button and the top of the strip
+    footGap: 6,         // px between the bottom of the images and the footer
+    band: [0.357, 0.879]  // top/bottom of the flat strip inside the canvas (0..1)
+  };
+  var TILE_W = 486, TILE_H = 320, GAP = 5;
+
+  var root = document.querySelector('.pf-bend');
+  if (!root) return;
+  var canvas = root.querySelector('.pf-bend-canvas');
+  var items = [].slice.call(root.querySelectorAll('.pf-bend-src li'));
+  var gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: true });
+  if (!gl || !items.length) { root.style.display = 'none'; return; }
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- shader ---- */
+  var VS = 'attribute vec2 p;varying vec2 uv;void main(){uv=vec2(p.x*.5+.5,1.-(p.y*.5+.5));gl_Position=vec4(p,0.,1.);}';
+  var FS = [
+    'precision highp float;',
+    'varying vec2 uv;',
+    'uniform sampler2D tex;',
+    'uniform vec2 res;',
+    'uniform float scroll,stripW,k,disp,posX,pivot,y0,y1,flat_,reach;',
+    'float ease(float t){return t<.5?4.*t*t*t:1.-pow(-2.*t+2.,3.)/2.;}',
+    'vec4 samp(float ch){',
+    '  float e=ease(clamp((abs(uv.x-posX)-flat_)/reach,0.,1.));',
+    '  float kc=k*(1.+ch*disp*.06);',
+    '  float sy=pivot+(uv.y-pivot)/(1.+kc*e);',
+    '  float v=(sy-y0)/(y1-y0);',
+    '  if(v<0.||v>1.) return vec4(0.);',
+    '  float px=uv.x*res.x+ch*disp*e*res.x*.0035;',
+    '  float u=fract((px+scroll)/stripW);',
+    '  return texture2D(tex,vec2(u,v));',
+    '}',
+    'void main(){',
+    '  vec4 r=samp(1.),g=samp(0.),b=samp(-1.);',
+    '  gl_FragColor=vec4(r.r,g.g,b.b,max(r.a,max(g.a,b.a)));',
+    '}'
+  ].join('\n');
+
+  function sh(type, src) {
+    var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s;
+  }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { root.style.display = 'none'; return; }
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  var U = {};
+  ['tex','res','scroll','stripW','k','disp','posX','pivot','y0','y1','flat_','reach'].forEach(function (n) {
+    U[n] = gl.getUniformLocation(prog, n);
+  });
+
+  /* ---- build the tile atlas ---- */
+  var tiles = [];   // {img, href}
+  var loaded = 0;
+  items.forEach(function (li) {
+    var img = new Image();
+    img.onload = img.onerror = function () {
+      if (img.naturalWidth) tiles.push({ img: img, href: li.dataset.href });
+      if (++loaded === items.length) buildAtlas();
+    };
+    img.src = li.dataset.src;
+  });
+
+  var tileCount = 0, ready = false;
+  function buildAtlas() {
+    if (!tiles.length) { root.style.display = 'none'; return; }
+    var list = tiles.slice();
+    while (list.length < 4) list = list.concat(tiles);   // repeat if few posts
+    list = list.slice(0, 8);
+    tileCount = list.length;
+    tiles = list;
+
+    var c = document.createElement('canvas');
+    c.width = TILE_W * tileCount; c.height = TILE_H;
+    var x = c.getContext('2d');
+    x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height);
+    list.forEach(function (t, i) {
+      var iw = t.img.naturalWidth, ih = t.img.naturalHeight;
+      var w = TILE_W - GAP * 2, h = TILE_H;
+      var s = Math.max(w / iw, h / ih);
+      var sw = w / s, sh_ = h / s;
+      x.drawImage(t.img, (iw - sw) / 2, (ih - sh_) / 2, sw, sh_, i * TILE_W + GAP, 0, w, h);
+    });
+
+    var tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.uniform1i(U.tex, 0);
+    ready = true;
+    resize();
+    root.classList.add('is-ready');
+    start();
+  }
+
+  /* ---- sizing / render ---- */
+  var W = 1, H = 1, dpr = 1, stripW = 1;
+  var scroll = 0, vel = 0, dragging = false, lastX = 0, moved = 0, last = 0, raf = 0, visible = true;
+  var K = 0.608 * (CFG.amount / 39) * CFG.stretchY;   // fitted so amount 39 matches the reference
+
+  /* stretch the section to the full width of the page area (edge to edge, right of the sidebar) */
+  function fit() {
+    root.style.width = ''; root.style.marginLeft = '0px';
+    var r = root.getBoundingClientRect();
+    var sb = document.getElementById('sidebar');
+    var sbR = 0;
+    if (sb) { var b = sb.getBoundingClientRect(); if (b.right > 0 && b.width > 0) sbR = b.right; }
+    var vw = document.documentElement.clientWidth;
+    root.style.width = (vw - sbR) + 'px';
+    root.style.marginLeft = (sbR - r.left) + 'px';
+
+    /* the canvas has empty space above the band: pull it up so the gap under the button is just CFG.gap px */
+    var h = canvas.getBoundingClientRect().height;
+    root.style.marginTop = (CFG.gap - CFG.band[0] * h) + 'px';
+    /* the canvas also has empty space below the band: trim it so the footer sits close */
+    root.style.marginBottom = (CFG.footGap - (1 - 0.91) * h) + 'px';
+  }
+
+  function resize() {
+    fit();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var r = canvas.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width * dpr));
+    H = Math.max(1, Math.round(r.height * dpr));
+    canvas.width = W; canvas.height = H;
+    gl.viewport(0, 0, W, H);
+    var bandH = (CFG.band[1] - CFG.band[0]) * H;
+    stripW = bandH * (TILE_W / TILE_H) * tileCount;
+    draw();
+  }
+
+  function draw() {
+    if (!ready) return;
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(U.res, W, H);
+    gl.uniform1f(U.scroll, scroll * dpr);
+    gl.uniform1f(U.stripW, stripW);
+    gl.uniform1f(U.k, K);
+    gl.uniform1f(U.disp, CFG.dispersion / 100);
+    gl.uniform1f(U.posX, CFG.posX);
+    gl.uniform1f(U.pivot, CFG.posY);
+    gl.uniform1f(U.y0, CFG.band[0]);
+    gl.uniform1f(U.y1, CFG.band[1]);
+    gl.uniform1f(U.flat_, CFG.flat);
+    gl.uniform1f(U.reach, CFG.reach);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  function frame(t) {
+    raf = 0;
+    var dt = Math.min((t - last) / 1000, 0.05); last = t;
+    if (!dragging) {
+      scroll += (reduce ? 0 : CFG.speed) * dt + vel * dt;
+      vel *= Math.pow(0.04, dt);           // inertia decay
+      if (Math.abs(vel) < 1) vel = 0;
+    }
+    draw();
+    if (visible && !reduce) raf = requestAnimationFrame(frame);
+  }
+  function start() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+
+  /* ---- interaction: drag to scrub, click a tile to open the post ---- */
+  /* which tile (if any) is under the pointer? -1 when the pointer is on the empty area around the images */
+  function hitTile(cx, cy) {
+    if (!ready) return -1;
+    var r = canvas.getBoundingClientRect();
+    var ux = (cx - r.left) / r.width, uy = (cy - r.top) / r.height;
+    var t = Math.min(Math.max((Math.abs(ux - CFG.posX) - CFG.flat) / CFG.reach, 0), 1);
+    var e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    var sy = CFG.posY + (uy - CFG.posY) / (1 + K * e);
+    var v = (sy - CFG.band[0]) / (CFG.band[1] - CFG.band[0]);
+    if (v < 0 || v > 1) return -1;
+    var u = (((ux * W + scroll * dpr) / stripW) % 1 + 1) % 1;
+    return Math.min(tileCount - 1, Math.floor(u * tileCount));
+  }
+
+  /* only the images react: dragging starts on an image, and the empty area is ignored */
+  canvas.addEventListener('pointerdown', function (e) {
+    if (hitTile(e.clientX, e.clientY) < 0) return;
+    dragging = true; moved = 0; lastX = e.clientX; vel = 0;
+    canvas.setPointerCapture(e.pointerId);
+    canvas.classList.add('is-drag');
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - lastX; lastX = e.clientX;
+    moved += Math.abs(dx);
+    scroll -= dx;
+    vel = -dx * 60;
+    if (reduce) draw();
+  });
+  /* The canvas is taller than the images (empty space above/below), so on mouse devices it only
+     catches the pointer while it is over an image; everywhere else clicks pass through to the page
+     (About Me button, project links, footer). Touch screens keep it always on. */
+  if (window.matchMedia('(hover: hover)').matches) {
+    canvas.style.pointerEvents = 'none';
+    document.addEventListener('pointermove', function (e) {
+      if (dragging) return;
+      var over = hitTile(e.clientX, e.clientY) >= 0;
+      canvas.style.pointerEvents = over ? 'auto' : 'none';
+      canvas.classList.toggle('is-over', over);
+    });
+  }
+  function up(e) {
+    if (!dragging) return;
+    dragging = false; canvas.classList.remove('is-drag');
+    if (moved < 5) {
+      var i = hitTile(e.clientX, e.clientY);
+      if (i >= 0 && tiles[i] && tiles[i].href) window.location.href = tiles[i].href;
+    }
+  }
+  canvas.addEventListener('pointerup', up);
+  canvas.addEventListener('pointercancel', function () { dragging = false; canvas.classList.remove('is-drag'); });
+
+  /* ---- lifecycle ---- */
+  window.addEventListener('resize', resize);
+  fit();
+  window.addEventListener('load', function () { if (ready) resize(); else fit(); });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (en) {
+      visible = en[0].isIntersecting;
+      if (visible && ready) start();
+    }).observe(root);
+  }
+})();
