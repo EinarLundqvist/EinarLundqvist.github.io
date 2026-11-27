@@ -1583,3 +1583,155 @@ a:not(.post-tag, .pf-btn, .pf-link, .img-link):hover * {
 #breadcrumb a span::after {
   content: none !important;
 }
+
+.pf-timeline strong {
+  color: var(--pf-neon);
+}
+
+/* timeline line: solid on the left, fades out to the right */
+@media (min-width: 48rem) {
+  .pf-timeline::before {
+    background: linear-gradient(to right, var(--tl-line) 92%, transparent);
+  }
+}
+
+.pf-tip {
+  border-radius: 4px !important;
+  padding: .45rem .8rem !important;
+}
+
+
+
+
+
+/* nav: hairline */
+#sidebar .nav-sub {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  margin: 0 1.5rem 2rem;
+  padding: 0;
+  border: 0;
+}
+#sidebar .nav-sub-item { position: static; flex: 1; }
+#sidebar .nav-sub-item::before { display: none; }
+#sidebar .nav-sub-link {
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(var(--pf-ring), var(--pf-ring)) center / 100% 1px no-repeat;
+  background-color: transparent !important;
+}
+#sidebar .nav-sub-item.active .nav-sub-link,
+#sidebar .nav-sub-link:hover,
+#sidebar .nav-sub-link:focus-visible {
+  background-image: linear-gradient(var(--pf-neon), var(--pf-neon));
+  background-size: 100% 2px;
+}
+#sidebar .nav-sub-link > span {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+#sidebar .nav-sub-link:hover > span,
+#sidebar .nav-sub-link:focus-visible > span { opacity: 1; }
+
+/* no constant Home underline on project pages */
+#sidebar .nav-item.is-parent > .nav-link:not(:hover):not(:focus-visible) > span::after {
+  transform-origin: right center;
+  transform: scaleX(0);
+}
+
+/* compact hairline: project name above the lines */
+#sidebar .nav-sub {
+  margin-top: 1.25rem;     /* room for the name */
+  margin-bottom: .25rem;
+}
+
+#sidebar .nav-sub-link {
+  height: 1.25rem;
+}
+
+#sidebar .nav-sub-link > span {
+  top: auto;
+  bottom: 100%;
+}
+
+/* open space for the name only while using this part of the menu */
+#sidebar .nav-sub {
+  margin-top: 0;
+  transition: margin-top .3s var(--pf-ease);
+}
+
+#sidebar .nav-item:hover .nav-sub,
+#sidebar .nav-item:focus-within .nav-sub {
+  margin-top: 1.25rem;
+}
+
+/* 3x taller click area that takes no extra space */
+#sidebar .nav-sub {
+  z-index: 2;                  /* keeps the hitbox above neighbouring items */
+}
+
+#sidebar .nav-sub-link {
+  height: 3.75rem;
+  margin-block: -1.25rem;      /* cancels the extra height in the layout */
+}
+
+/* current project: looks hovered all the time */
+#sidebar .nav-sub-item.active .nav-sub-link {
+  background-image: linear-gradient(var(--pf-neon), var(--pf-neon));
+  background-size: 100% 2px;
+}
+
+#sidebar .nav-sub-item.active .nav-sub-link > span {
+  opacity: 1;
+  color: var(--pf-neon);
+}
+
+/* keep room for its name */
+#sidebar .nav-sub:has(.nav-sub-item.active) {
+  margin-top: 1.25rem;
+}
+
+/* hide it while hovering another project, so the names don't overlap */
+#sidebar .nav-sub:has(.nav-sub-link:hover) .nav-sub-item.active .nav-sub-link:not(:hover) > span {
+  opacity: 0;
+}
+
+/* Home button background, extended down over the hairline menu */
+#sidebar li.nav-item:has(.nav-sub) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  position: relative;
+  isolation: isolate;
+}
+
+#sidebar li.nav-item:has(.nav-sub) > .nav-link {
+  grid-area: 1 / 1;
+  background: transparent !important;
+}
+
+#sidebar li.nav-item:has(.nav-sub) > .nav-sub {
+  grid-area: 2 / 1;
+  margin-inline: .75rem;       /* space between the lines and the background edges */
+  margin-bottom: 0;
+  padding-bottom: .5rem;
+}
+
+#sidebar li.nav-item:has(.nav-sub)::before {
+  content: "";
+  grid-area: 1 / 1 / 3 / 2;    /* covers the button and the menu */
+  z-index: -1;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+#sidebar li.nav-item:has(.nav-sub):is(.active, .is-parent, :hover, :focus-within)::before {
+  background: var(--sidebar-hover-bg);
+}
