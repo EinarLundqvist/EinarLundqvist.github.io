@@ -131,46 +131,108 @@ layout: default
     amount: 39,  /* Amount */
     flat: 0.247,  /* half-width fraction around the centre that stays perfectly flat */
     reach: 0.477,  /* how far (fraction of width) the ease-in-out-cubic ramp runs past the flat zone */
-    dispersion: 100,  /* Chrom. Dispersion */
+    dispersion: 300,  /* Chrom. Dispersion (0 = off and a single sample) */
+    dispBlur: 0.6,  /* softness of the colour fringes: 0.3 = crisp separate copies, 0.6 = soft, 1+ = very smooth */
     sides: 2,  /* Two (symmetric left/right) */
     speed: 28,  /* px/sec auto-drift (0 = static) */
-    gap: 104,  /* px between the About Me button and the top of the strip */
-    footGap: 6,  /* px between the bottom of the images and the footer */
+    hideOnSoftwareGL: true,  /* hide the strip when the browser has no real GPU (false = always show) */
+    fps: 60,  /* frame cap for the drift (30 or 60) */
+    maxDpr: 1,  /* render resolution cap: lower = faster (1 = fastest, 2 = sharpest) */
+    gap: 40,  /* px between the About Me button and the top of the strip */
+    footGap: -6,  /* px between the bottom of the images and the footer */
     band: [0.357, 0.879]  /* top/bottom of the flat strip inside the canvas (0..1) */
   };
   var TILE_W = 486, TILE_H = 320, GAP = 5;
+
+  /* guard: if this script was included more than once, only the first copy runs and extra strips are hidden */
+  var allStrips = document.querySelectorAll('.pf-bend');
+  for (var si = 1; si < allStrips.length; si++) allStrips[si].style.display = 'none';
+  if (window.pfBend) { console.warn('[pf-bend] script was loaded twice; ignoring the extra copy. Check home.html for a duplicated block.'); return; }
 
   var root = document.querySelector('.pf-bend');
   if (!root) return;
   var canvas = root.querySelector('.pf-bend-canvas');
   var items = [].slice.call(root.querySelectorAll('.pf-bend-src li'));
-  var gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: true });
+  var gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: true, powerPreference: 'high-performance' });
   if (!gl || !items.length) { root.style.display = 'none'; return; }
+
+  /* on a machine with no real GPU (software WebGL) the shader runs on the CPU and slows the whole page, so skip the strip */
+  if (CFG.hideOnSoftwareGL) {
+    var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    var rn = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '';
+    if (/swiftshader|basic render|llvmpipe|softpipe|software/i.test(rn)) {
+      console.info('[pf-bend] software WebGL detected (' + rn + '), strip hidden. Set hideOnSoftwareGL to false in CFG to force it on.');
+      root.style.display = 'none';
+      return;
+    }
+  }
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---- shader ---- */
+  gl.getExtension('OES_standard_derivatives');
   var VS = 'attribute vec2 p;varying vec2 uv;void main(){uv=vec2(p.x*.5+.5,1.-(p.y*.5+.5));gl_Position=vec4(p,0.,1.);}';
-  var FS = [
+    var FS = [
+    '#extension GL_OES_standard_derivatives : enable',
     'precision highp float;',
     'varying vec2 uv;',
     'uniform sampler2D tex;',
     'uniform vec2 res;',
-    'uniform float scroll,stripW,k,disp,posX,pivot,y0,y1,flat_,reach;',
+    'uniform float scroll,stripW,k,disp,posX,pivot,y0,y1,flat_,reach,dblur,dbg;',
     'float ease(float t){return t<.5?4.*t*t*t:1.-pow(-2.*t+2.,3.)/2.;}',
-    'vec4 samp(float ch){',
-    '  float e=ease(clamp((abs(uv.x-posX)-flat_)/reach,0.,1.));',
-    '  float kc=k*(1.+ch*disp*.06);',
-    '  float sy=pivot+(uv.y-pivot)/(1.+kc*e);',
+    'vec4 samp(float ch,float e){',
+    '  float sy=pivot+(uv.y-pivot)/(1.+k*e);',
     '  float v=(sy-y0)/(y1-y0);',
-    '  if(v<0.||v>1.) return vec4(0.);',
+    '  float aa=max(fwidth(v),1e-5);',
+    '  float cover=clamp(min(v,1.-v)/aa+.5,0.,1.);',
     '  float px=uv.x*res.x+ch*disp*e*res.x*.0035;',
     '  float u=fract((px+scroll)/stripW);',
-    '  return texture2D(tex,vec2(u,v));',
+    '  return texture2D(tex,vec2(u,clamp(v,0.,1.)))*cover;',
+    '}',
+
+    /* draws the images and the chromatic aberration */
+    'void strip(){',
+    '  float e=ease(clamp((abs(uv.x-posX)-flat_)/reach,0.,1.));',
+    '  if(dbg>.5&&dbg<1.5){gl_FragColor=vec4(e,0.,1.-e,1.);return;}',
+    '  if(dbg>1.5){vec4 da=samp(1.,e),db=samp(-1.,e);gl_FragColor=vec4(abs(da.rgb-db.rgb)*4.,1.);return;}',
+    '  if(e<.002){gl_FragColor=samp(0.,0.);return;}',
+    '  if(disp<.001){gl_FragColor=samp(0.,e);return;}',
+    '  vec3 acc=vec3(0.),ws=vec3(0.),al=vec3(0.);',
+    '  for(int i=0;i<9;i++){',
+    '    float t=-1.25+float(i)*.3125;',
+    '    vec4 c=samp(t,e);',
+    '    float a1=(t-1.)/dblur,a2=t/dblur,a3=(t+1.)/dblur;',
+    '    vec3 w=vec3(exp(-a1*a1),exp(-a2*a2),exp(-a3*a3));',
+    '    acc+=c.rgb*w;ws+=w;al+=c.a*w;',
+    '  }',
+    '  vec3 a=al/ws;',
+    '  gl_FragColor=vec4(acc/ws,max(a.r,max(a.g,a.b)));',
+    '}',
+
+    /* hover ring and corner marks */
+    'uniform float hov,amt,count,gapF,pxr;',
+    'float rectA(vec2 p,vec2 s){',
+    '  vec2 a=clamp(p*pxr+.5,0.,1.)*clamp((s-p)*pxr+.5,0.,1.);',
+    '  return a.x*a.y;',
     '}',
     'void main(){',
-    '  vec4 r=samp(1.),g=samp(0.),b=samp(-1.);',
-    '  gl_FragColor=vec4(r.r,g.g,b.b,max(r.a,max(g.a,b.a)));',
+    '  strip();',
+    '  if(amt<=0.) return;',
+    '  float e=ease(clamp((abs(uv.x-posX)-flat_)/reach,0.,1.));',
+    '  float v=(pivot+(uv.y-pivot)/(1.+k*e)-y0)/(y1-y0);',
+    '  float tw=stripW/count;',
+    '  float t=mod(uv.x*res.x+scroll,stripW);',
+    '  if(abs(floor(t/tw)-hov)>.5) return;',
+    '  vec2 size=vec2(tw*(1.-2.*gapF),(y1-y0)*res.y)/pxr;',
+    '  vec2 p=vec2(mod(t,tw)-tw*gapF,v*(y1-y0)*res.y)/pxr;',
+    '  float r0=rectA(p,size),r1=rectA(p-1.5,size-3.),r2=rectA(p-3.5,size-7.);',
+    '  vec2 q=size*.5+(p-size*.5)/mix(1.04,1.,amt);',
+    '  vec2 c=min(q,size-q)-13.6;',
+    '  float m=max(rectA(c,vec2(17.6,2.)),rectA(c,vec2(2.,17.6)));',
+    '  vec3 neon=vec3(.894,.631,.286);',
+    '  float g=(r1-r2)*amt, o=max(r0-r1,m)*amt;',
+    '  gl_FragColor=mix(gl_FragColor,vec4(vec3(.267),1.),g);',
+    '  gl_FragColor=mix(gl_FragColor,vec4(neon,1.),o);',
     '}'
   ].join('\n');
 
@@ -192,7 +254,7 @@ layout: default
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   var U = {};
-  ['tex','res','scroll','stripW','k','disp','posX','pivot','y0','y1','flat_','reach'].forEach(function (n) {
+  ['tex','res','scroll','stripW','k','disp','posX','pivot','y0','y1','flat_','reach','dblur','dbg','hov','amt','count','gapF','pxr'].forEach(function (n) {
     U[n] = gl.getUniformLocation(prog, n);
   });
 
@@ -208,7 +270,7 @@ layout: default
     img.src = li.dataset.src;
   });
 
-  var tileCount = 0, ready = false;
+  var tileCount = 0, ready = false, tex = null;
   function buildAtlas() {
     if (!tiles.length) { root.style.display = 'none'; return; }
     var list = tiles.slice();
@@ -219,18 +281,31 @@ layout: default
 
     var c = document.createElement('canvas');
     c.width = TILE_W * tileCount; c.height = TILE_H;
+
     var x = c.getContext('2d');
-    x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height);
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var bandCss = (CFG.band[1] - CFG.band[0]) * canvas.getBoundingClientRect().height;
+    var radius = 0.25 * rem * TILE_H / (bandCss || TILE_H);  /* screen size -> atlas pixels */
+
     list.forEach(function (t, i) {
       var iw = t.img.naturalWidth, ih = t.img.naturalHeight;
       var w = TILE_W - GAP * 2, h = TILE_H;
       var s = Math.max(w / iw, h / ih);
       var sw = w / s, sh_ = h / s;
-      x.drawImage(t.img, (iw - sw) / 2, (ih - sh_) / 2, sw, sh_, i * TILE_W + GAP, 0, w, h);
+      var left = i * TILE_W + GAP;
+
+      x.save();
+      x.beginPath();
+      x.roundRect(left, 0, w, h, radius);
+      x.clip();
+      x.drawImage(t.img, (iw - sw) / 2, (ih - sh_) / 2, sw, sh_, left, 0, w, h);
+      x.restore();
     });
 
-    var tex = gl.createTexture();
+    tex = gl.createTexture();
+    gl.useProgram(prog);
     gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -268,7 +343,7 @@ layout: default
 
   function resize() {
     fit();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, CFG.maxDpr);
     var r = canvas.getBoundingClientRect();
     W = Math.max(1, Math.round(r.width * dpr));
     H = Math.max(1, Math.round(r.height * dpr));
@@ -276,11 +351,43 @@ layout: default
     gl.viewport(0, 0, W, H);
     var bandH = (CFG.band[1] - CFG.band[0]) * H;
     stripW = bandH * (TILE_W / TILE_H) * tileCount;
+    console.info('[pf-bend v7] canvas ' + W + 'x' + H + ', dpr ' + dpr + ', fps cap ' + CFG.fps + ', dispersion ' + CFG.dispersion);
     draw();
   }
 
+  var mouse = null, hoverIdx = -1, hoverAmt = 0, hoverTime = 0;
+
+  document.addEventListener('pointermove', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    mouse = { x: e.clientX, y: e.clientY };
+    if (reduce) draw();
+  }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', function () {
+    mouse = null;
+    if (reduce) draw();
+  });
+
+  function updateHover() {
+    var now = performance.now();
+    var step = reduce ? 1 : Math.min((now - hoverTime) / 1000, 0.1) / 0.25;
+    hoverTime = now;
+    var i = mouse ? hitTile(mouse.x, mouse.y) : -1;
+    if (i >= 0 && i !== hoverIdx) { hoverIdx = i; hoverAmt = 0; }
+    hoverAmt = i >= 0 ? Math.min(1, hoverAmt + step) : Math.max(0, hoverAmt - step);
+  }
+
+  var warnedProgram = false;
   function draw() {
     if (!ready) return;
+    /* if some other script on the page shares this canvas's WebGL context and switched programs, take it back */
+    if (gl.getParameter(gl.CURRENT_PROGRAM) !== prog) {
+      if (!warnedProgram) { warnedProgram = true; console.warn('[pf-bend] another script is using this canvas WebGL context (it switched the shader program). Look for a second copy of the strip code, e.g. an old pf-bend-strip.js still being loaded.'); }
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+    }
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform2f(U.res, W, H);
@@ -294,19 +401,28 @@ layout: default
     gl.uniform1f(U.y1, CFG.band[1]);
     gl.uniform1f(U.flat_, CFG.flat);
     gl.uniform1f(U.reach, CFG.reach);
+    gl.uniform1f(U.dblur, Math.max(CFG.dispBlur, 0.05));
+    gl.uniform1f(U.dbg, CFG.debug || 0);
+    updateHover();
+    gl.uniform1f(U.hov, hoverIdx);
+    gl.uniform1f(U.amt, hoverAmt);
+    gl.uniform1f(U.count, tileCount);
+    gl.uniform1f(U.gapF, GAP / TILE_W);
+    gl.uniform1f(U.pxr, dpr);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 
   function frame(t) {
     raf = 0;
-    var dt = Math.min((t - last) / 1000, 0.05); last = t;
+    if (visible && !reduce) raf = requestAnimationFrame(frame);
+    if (t - last < 1000 / CFG.fps - 2) return;   /* frame cap: skip until it's time to draw */
+    var dt = Math.min((t - last) / 1000, 0.1); last = t;
     if (!dragging) {
       scroll += (reduce ? 0 : CFG.speed) * dt + vel * dt;
       vel *= Math.pow(0.04, dt);  /* inertia decay */
       if (Math.abs(vel) < 1) vel = 0;
     }
     draw();
-    if (visible && !reduce) raf = requestAnimationFrame(frame);
   }
   function start() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
 
@@ -345,12 +461,19 @@ layout: default
      (About Me button, project links, footer). Touch screens keep it always on. */
   if (window.matchMedia('(hover: hover)').matches) {
     canvas.style.pointerEvents = 'none';
+    var pmx = 0, pmy = 0, pmq = false;
     document.addEventListener('pointermove', function (e) {
-      if (dragging) return;
-      var over = hitTile(e.clientX, e.clientY) >= 0;
-      canvas.style.pointerEvents = over ? 'auto' : 'none';
-      canvas.classList.toggle('is-over', over);
-    });
+      if (dragging || !visible) return;
+      pmx = e.clientX; pmy = e.clientY;
+      if (pmq) return;
+      pmq = true;
+      requestAnimationFrame(function () {
+        pmq = false;
+        var over = visible && hitTile(pmx, pmy) >= 0;
+        canvas.style.pointerEvents = over ? 'auto' : 'none';
+        canvas.classList.toggle('is-over', over);
+      });
+    }, { passive: true });
   }
   function up(e) {
     if (!dragging) return;
@@ -362,6 +485,9 @@ layout: default
   }
   canvas.addEventListener('pointerup', up);
   canvas.addEventListener('pointercancel', function () { dragging = false; canvas.classList.remove('is-drag'); });
+
+  /* handy for live tuning from the browser console, e.g. pfBend.CFG.maxDpr = 0.5; pfBend.resize(); */
+  window.pfBend = { CFG: CFG, gl: gl, draw: function () { if (ready) draw(); }, resize: function () { if (ready) resize(); } };
 
   /* ---- lifecycle ---- */
   window.addEventListener('resize', resize);

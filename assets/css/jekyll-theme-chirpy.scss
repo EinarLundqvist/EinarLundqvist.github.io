@@ -1530,3 +1530,56 @@ a:not(.post-tag, .pf-btn, .pf-link, .img-link):hover * {
 @media (max-width: 991px) {
   .pf-bend { display: none; }
 }
+
+/* ---------- bent image strip (paste at the end of jekyll-theme-chirpy.scss) ---------- */
+.pf-bend {
+  position: relative;
+  z-index: 2;                  /* above the ascii cat (z-index 1), so images scroll over it */
+  margin: 0;                   /* width, left offset and top gap are set by JS */
+  max-width: none;
+  contain: layout paint;       /* keeps the per-frame repaint from invalidating the rest of the page */
+  opacity: 0;
+  transition: opacity .6s var(--pf-ease);
+
+  &.is-ready { opacity: 1; }
+}
+
+.pf-bend-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3.4 / 1;       /* reference was 2.7 / 1; larger number = shorter, smaller strip */
+  cursor: default;
+  touch-action: pan-y;         /* vertical page scroll still works on touch */
+  user-select: none;
+
+  &.is-over { cursor: grab; }      /* only while hovering an image */
+  &.is-drag { cursor: grabbing; }
+}
+
+.pf-bend-src { display: none; }
+
+@media (max-width: 849px) {
+  .pf-bend-canvas { aspect-ratio: 2.1 / 1; }
+}
+
+/* ---------- About Me button: less space under the project list ---------- */
+.pf-home-cta {
+  position: relative;
+  z-index: 3;                  /* always above the strip's canvas, so the button stays clickable */
+  margin: 1.5rem 0 0;          /* was 3rem 0 1rem */
+  justify-content: flex-start; /* was center: button now sits on the left */
+}
+
+/* ---------- hide the strip on narrower screens (same 991px breakpoint as the ascii cat) ---------- */
+@media (max-width: 991px) {
+  .pf-bend { display: none; }
+}
+
+/* let clicks pass through the strip's empty space */
+.pf-bend { pointer-events: none; }
+.pf-bend-canvas { pointer-events: auto; }
+
+/* no breadcrumb separators between the decipher effect's letters */
+#breadcrumb a span::after {
+  content: none !important;
+}
