@@ -215,6 +215,11 @@ layout: default
     '  vec2 a=clamp(p*pxr+.5,0.,1.)*clamp((s-p)*pxr+.5,0.,1.);',
     '  return a.x*a.y;',
     '}',
+    'float roundA(vec2 p,vec2 s,float r){',
+    '  vec2 q=abs(p-s*.5)-s*.5+r;',
+    '  float d=length(max(q,0.))+min(max(q.x,q.y),0.)-r;',
+    '  return clamp(.5-d*pxr,0.,1.);',
+    '}',
     'void main(){',
     '  strip();',
     '  if(amt<=0.) return;',
@@ -225,7 +230,8 @@ layout: default
     '  if(abs(floor(t/tw)-hov)>.5) return;',
     '  vec2 size=vec2(tw*(1.-2.*gapF),(y1-y0)*res.y)/pxr;',
     '  vec2 p=vec2(mod(t,tw)-tw*gapF,v*(y1-y0)*res.y)/pxr;',
-    '  float r0=rectA(p,size),r1=rectA(p-1.5,size-3.),r2=rectA(p-3.5,size-7.);',
+    '  float rad=4.;',
+    '  float r0=roundA(p,size,rad),r1=roundA(p-1.5,size-3.,rad-1.5),r2=roundA(p-3.5,size-7.,max(rad-3.5,0.));',
     '  vec2 q=size*.5+(p-size*.5)/mix(1.04,1.,amt);',
     '  vec2 c=min(q,size-q)-13.6;',
     '  float m=max(rectA(c,vec2(17.6,2.)),rectA(c,vec2(2.,17.6)));',
@@ -285,7 +291,7 @@ layout: default
     var x = c.getContext('2d');
     var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     var bandCss = (CFG.band[1] - CFG.band[0]) * canvas.getBoundingClientRect().height;
-    var radius = 0.25 * rem * TILE_H / (bandCss || TILE_H);  /* screen size -> atlas pixels */
+    var radius = 0.3 * rem * TILE_H / (bandCss || TILE_H);  /* screen size -> atlas pixels */
 
     list.forEach(function (t, i) {
       var iw = t.img.naturalWidth, ih = t.img.naturalHeight;
