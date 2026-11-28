@@ -160,6 +160,7 @@
 
   function init() {
     document.querySelectorAll('.pf-btn').forEach(function (b) { setup(b, b); });
+    document.querySelectorAll('.pf-copy').forEach(function (b) { setup(b, b); });
     document.querySelectorAll('.pf-title').forEach(function (t) {
       setup(t, t.closest('.pf-link') || t);
     });
@@ -403,8 +404,9 @@
 
     pre.addEventListener('mouseenter', function () { hover = true; });
     pre.addEventListener('mouseleave', function () { hover = false; });
-    pre.addEventListener('click', function () {
-      if (hasSelection()) return;               // dragging to copy shouldn't trigger it
+    pre.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;   // left click only
+      e.preventDefault();
       say();
       if (!reduced) shiver();
     });
@@ -413,7 +415,7 @@
     if (reduced) return;
 
     setInterval(function () {
-      if ((hover && !fx) || hasSelection()) return;  // freeze so selecting/copying works
+      if (hasSelection()) return;
       step++;
       eyes = EYES_OPEN;
       if (blink > 0) { eyes = EYES_SHUT; blink--; }
@@ -536,7 +538,8 @@
   // recover when the tab or page comes back (tab switch, back/forward cache)
   function resume() {
     document.querySelectorAll('video[data-ap-ready]').forEach(function (v) {
-      if (v.paused) tryPlay(v);
+      var r = v.getBoundingClientRect();
+      if (v.paused && r.bottom > 0 && r.top < innerHeight) tryPlay(v);
     });
   }
   document.addEventListener('visibilitychange', function () {
@@ -552,4 +555,73 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
   window.addEventListener('load', init); // catches anything injected late
+})();
+
+
+
+
+
+/* Copy to clipboard, with a "Kopierad!" box */
+document.addEventListener('click', function (e) {
+  var btn = e.target.closest('.pf-copy');
+  if (!btn) return;
+
+  navigator.clipboard.writeText(btn.dataset.copy).then(function () {
+    var note = document.createElement('div');
+    note.className = 'pf-tip is-on';   /* same style as your software hover boxes */
+    note.setAttribute('role', 'status');
+    note.textContent = 'Kopierad!';
+    document.body.appendChild(note);
+
+    var r = btn.getBoundingClientRect();
+    note.style.transform = 'translate(' + r.left + 'px,' + (r.top - note.offsetHeight - 6) + 'px)';
+
+    setTimeout(function () { note.remove(); }, 1500);
+  });
+});
+
+
+
+
+
+/* Move contact + socials into the footer on narrower screens */
+(function () {
+  function init() {
+    var footer = document.querySelector('footer');
+    var sections = [
+      document.getElementById('access-contact'),
+      document.getElementById('access-socials')
+    ].filter(Boolean);
+    if (!footer || !sections.length) return;
+
+    var box = document.createElement('div');
+    box.className = 'pf-foot-contact';
+
+    /* remember where each section came from */
+    var marks = sections.map(function (s) {
+      var mark = document.createComment(s.id);
+      s.parentNode.insertBefore(mark, s);
+      return mark;
+    });
+
+    var narrow = window.matchMedia('(max-width: 1199.98px)');
+
+    function update() {
+      if (narrow.matches) {
+        sections.forEach(function (s) { box.appendChild(s); });
+        footer.prepend(box);
+      } else {
+        sections.forEach(function (s, i) {
+          marks[i].parentNode.insertBefore(s, marks[i].nextSibling);
+        });
+        box.remove();
+      }
+    }
+
+    narrow.addEventListener('change', update);
+    update();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();

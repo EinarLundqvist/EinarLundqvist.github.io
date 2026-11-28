@@ -136,7 +136,8 @@ layout: default
     sides: 2,  /* Two (symmetric left/right) */
     speed: 28,  /* px/sec auto-drift (0 = static) */
     hideOnSoftwareGL: true,  /* hide the strip when the browser has no real GPU (false = always show) */
-    fps: 60,  /* frame cap for the drift (30 or 60) */
+    fps: 30,      /* frame cap for the slow drift */
+    dragFps: 60,  /* frame cap while dragging and gliding */
     maxDpr: 1,  /* render resolution cap: lower = faster (1 = fastest, 2 = sharpest) */
     gap: 40,  /* px between the About Me button and the top of the strip */
     footGap: -6,  /* px between the bottom of the images and the footer */
@@ -421,7 +422,8 @@ layout: default
   function frame(t) {
     raf = 0;
     if (visible && !reduce) raf = requestAnimationFrame(frame);
-    if (t - last < 1000 / CFG.fps - 2) return;   /* frame cap: skip until it's time to draw */
+    var cap = (dragging || Math.abs(vel) > 5) ? CFG.dragFps : CFG.fps;
+    if (t - last < 1000 / cap - 2) return;   /* frame cap */
     var dt = Math.min((t - last) / 1000, 0.1); last = t;
     if (!dragging) {
       scroll += (reduce ? 0 : CFG.speed) * dt + vel * dt;
