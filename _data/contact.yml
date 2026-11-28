@@ -3,11 +3,11 @@
 
 - type: github
   icon: "fab fa-github"
-  url: 'https://github.com/YOUR-USERNAME'
+  url: 'https://github.com/EinarLundqvist'
 
 - type: linkedin
   icon: "fab fa-linkedin"
-  url: "https://www.linkedin.com/in/YOUR-PROFILE"
+  url: 'https://www.linkedin.com/in/einar-lundqvist-0b74a72bb/'
   
 - type: email
   icon: "fas fa-envelope"

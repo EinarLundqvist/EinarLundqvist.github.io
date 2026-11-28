@@ -15,16 +15,24 @@ order: 1
 <ol class="pf-timeline">
 <li>
 <time>2022 – 2025</time>
+<details class="pf-more">
+<summary>
 <h3>LBS Norra – Spelprogrammering</h3>
 <span class="pf-meta">Gymnasieutbildning · Solna, Stockholm</span>
+</summary>
 <p>Spelprogrammering, spelutveckling och produktutveckling med Game-Jams i grupp ~8 personer.</p>
+</details>
 </li>
 <li>
 <time>2025 – 2028</time>
+<details class="pf-more">
+<summary>
 <h3>The Game Assembly – Procedural art</h3>
 <span class="pf-meta">Yrkeshögskola · Stora Essingen, Stockholm</span>
+</summary>
 <p>Arbetar med spelprojekt som utvecklas under flera månader ~18 personer, fyra timmar om dagen.</p>
 <p>Individuellt arbete inom procedural/tech art, resterande fyra timmarna av skoldagen.</p>
+</details>
 <p><strong>Planerad praktikperiod September 2027 – April 2028.</strong></p>
 </li>
 </ol>
@@ -61,3 +69,4 @@ order: 1
 <p class="pf-home-cta"><span class="pf-cv-wrap"><a class="pf-btn" href="{{ '/assets/resume.pdf' | relative_url }}" target="_blank" rel="noopener">CV <i class="fas fa-arrow-up-right-from-square"></i></a><a class="pf-cv-pop" href="{{ '/assets/resume.pdf' | relative_url }}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><span style="background-image:url('/assets/img/cvpreview.png')"></span></a></span></p>
 
 <p class="pf-disclaimer">All trademarked logos are the property of their owners and are not shown for affiliation.</p>
+{% include pf-bend.html %}

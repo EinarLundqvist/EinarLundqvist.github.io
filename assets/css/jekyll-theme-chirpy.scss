@@ -1770,3 +1770,110 @@ a:not(.post-tag, .pf-btn, .pf-link, .img-link):hover * {
 #access-socials a.post-tag {
   border-radius: 999px !important;
 }
+
+
+/* timeline dropdowns */
+.pf-more summary {
+  display: block;               /* hides the default triangle */
+  cursor: pointer;
+  list-style: none;
+}
+
+.pf-more summary::-webkit-details-marker {
+  display: none;
+}
+
+/* arrow next to the title */
+.pf-more summary h3::after {
+  content: "";
+  display: inline-block;
+  width: .45rem;
+  height: .45rem;
+  margin-left: .6rem;
+  border-right: 2px solid var(--pf-neon);
+  border-bottom: 2px solid var(--pf-neon);
+  vertical-align: .15em;
+  rotate: 45deg;                /* points down */
+  transition: rotate .25s var(--pf-ease);
+}
+
+.pf-more[open] summary h3::after {
+  rotate: 225deg;               /* points up */
+}
+
+.pf-more summary:focus-visible {
+  outline: 1px solid var(--pf-neon);
+  outline-offset: 4px;
+}
+
+/* keep the timeline full width when dropdowns are closed */
+.pf-timeline {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pf-timeline li,
+.pf-more,
+.pf-more summary {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 48rem) {
+  .pf-timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;      /* opening one column doesn't stretch the other */
+  }
+}
+
+/* praktik period: orange but not bold */
+.pf-timeline strong {
+  font-weight: 400;
+}
+
+.pf-more h3 .pf-sc {
+  transition: color .2s;
+}
+
+.pf-more h3 .pf-sc.is-lit {
+  color: var(--code-color);
+}
+/* stop the timeline titles shifting while deciphering */
+.pf-more h3 .pf-scramble.is-scrambling .pf-sc {
+  line-height: 0;     /* letters no longer affect the line height */
+}
+
+/* arrow in a rounded square */
+.pf-more summary h3::after {
+  content: "";
+  display: inline-block;
+  box-sizing: border-box;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-left: .6rem;
+  vertical-align: middle;
+  border: 1.5px solid var(--tl-line);
+  border-radius: 4px;
+  rotate: 0deg;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23e4a149' stroke-width='2'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") center / .85rem no-repeat;
+  transition: rotate .25s var(--pf-ease), background-color .25s;
+}
+
+.pf-more[open] summary h3::after {
+  rotate: 180deg;              /* arrow points up */
+}
+
+.pf-more summary:hover h3::after,
+.pf-more summary:focus-visible h3::after {
+  background-color: rgb(228 161 73 / 18%);
+}
+
+/* cap the strip's size on wide screens */
+.pf-bend-canvas {
+  max-height: 550px;
+}
+
+/* back to top button above the scrolling images */
+#back-to-top {
+  z-index: 10 !important;
+}

@@ -161,6 +161,9 @@
   function init() {
     document.querySelectorAll('.pf-btn').forEach(function (b) { setup(b, b); });
     document.querySelectorAll('.pf-copy').forEach(function (b) { setup(b, b); });
+    document.querySelectorAll('.pf-more summary h3').forEach(function (h) {
+      setup(h, h.closest('summary'));
+    });
     document.querySelectorAll('.pf-title').forEach(function (t) {
       setup(t, t.closest('.pf-link') || t);
     });
@@ -563,12 +566,15 @@
 
 /* Copy to clipboard, with a "Kopierad!" box */
 document.addEventListener('click', function (e) {
-  var btn = e.target.closest('.pf-copy');
+  var btn = e.target.closest('.pf-copy, #sidebar a[aria-label="email"]');
   if (!btn) return;
+  e.preventDefault();   // stops the sidebar icon from opening a mail app
 
-  navigator.clipboard.writeText(btn.dataset.copy).then(function () {
+  var email = btn.dataset.copy || 'einar.lundqvist@gmail.com';
+
+  navigator.clipboard.writeText(email).then(function () {
     var note = document.createElement('div');
-    note.className = 'pf-tip is-on';   /* same style as your software hover boxes */
+    note.className = 'pf-tip is-on';
     note.setAttribute('role', 'status');
     note.textContent = 'Kopierad!';
     document.body.appendChild(note);
